@@ -14,11 +14,11 @@ import java.util.Date;
 @MappedSuperclass
 public class BasicBean {
     private String createuser;
-
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "CREATDATE")
     private Date createdate;
-
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "UPDATEDATE")
     private Date updatedate;
     private String updateuser;
 
