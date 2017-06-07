@@ -20,10 +20,11 @@ public class User extends BasicBean{
     private String userCode;//用户编号
     @Column(name = "USERNAME")
     private String userName;//用户名
-    private String password;//密码
+    @Column(name = "USERPSW")
+    private String userPsw;//密码
     private String phone;//联系电话
     private String address;//用户地址
-    private String state;//0为停用、1为启用
+    private int state;//0为停用、1为启用
     private String email;//用户邮箱
 
     public String getUserCode() {
@@ -42,12 +43,12 @@ public class User extends BasicBean{
         this.userName = userName;
     }
 
-    public String getPassword() {
-        return password;
+    public String getUserPsw() {
+        return userPsw;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setUserPsw(String userPsw) {
+        this.userPsw = userPsw;
     }
 
     public String getPhone() {
@@ -66,11 +67,11 @@ public class User extends BasicBean{
         this.address = address;
     }
 
-    public String getState() {
+    public int getState() {
         return state;
     }
 
-    public void setState(String state) {
+    public void setState(int state) {
         this.state = state;
     }
 
@@ -81,4 +82,5 @@ public class User extends BasicBean{
     public void setEmail(String email) {
         this.email = email;
     }
+
 }

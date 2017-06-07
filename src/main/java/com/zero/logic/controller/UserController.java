@@ -2,16 +2,16 @@ package com.zero.logic.controller;/**
  * Created by Admin on 2017/6/1.
  */
 
-import com.sun.xml.internal.bind.v2.model.core.ID;
 import com.zero.logic.dao.UserDao;
 import com.zero.logic.dao.UserDaoService;
 import com.zero.logic.domain.User;
 import com.zero.logic.util.JDBCUtil;
 import com.zero.logic.util.JsonUtil;
+import com.zero.logic.util.MD5Util;
 import com.zero.logic.util.TableUtil;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.json.JSONException;
+import net.sf.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -41,10 +41,10 @@ public class UserController {
     @RequestMapping(value = "getUserByPage",method = RequestMethod.GET)
     @ApiOperation(value = "分页获取用户",notes = "分页获取用户")
     public List<Object> getUserByPage(
-            @RequestParam(value = "page", defaultValue = "0") Integer pageNo,
+            @RequestParam(value = "page", defaultValue = "0") Integer pageNum,
             @RequestParam(value = "size", defaultValue = "15") Integer pageSize){
         Sort sort = new Sort(Sort.Direction.DESC, "userCode");
-        Pageable pageable = new PageRequest(pageNo-1 , pageSize, sort);
+        Pageable pageable = new PageRequest(pageNum-1 , pageSize, sort);
         Page<User> users = userDao.findAll(pageable);
 
         List<Object> list = new ArrayList<>();
@@ -54,20 +54,23 @@ public class UserController {
 
         int total = JDBCUtil.getCount(JDBCUtil.getConn(),"sys_user");//获取总用户数
         int totalPage = total%pageSize==0? total/pageSize:total/pageSize+1;//总页数
-        list.add(TableUtil.createTableDate(total,pageNo,totalPage));
+        list.add(TableUtil.createTableDate(total,pageNum,totalPage));
         return list;
     }
 
-    @RequestMapping(value = "queryPageByLike",method = RequestMethod.GET)
+    /**
+     *原生查询  之后再改
+     */
+    @RequestMapping(value = "getByPage",method = RequestMethod.GET)
     @ApiOperation(value = "模糊查询分页获取用户",notes = "模糊查询分页获取用户")
-    public List<Object> queryPageByLike(
+    public List<Object> getByPage(
             @RequestParam("keyWord")String keyWord,
-            @RequestParam("pageNo")int pageNo,
+            @RequestParam("pageNum")int pageNum,
             @RequestParam("pageSize")int pageSize){
-        List<Object> users = userDaoService.getUserByPage(keyWord,pageNo,pageSize);
+        List<Object> users = userDaoService.getUserByPage(keyWord,pageNum,pageSize);
         int total = userDaoService.getTotalCount(keyWord);//获取模糊查询用户总数
         int totalPage = total%pageSize==0? total/pageSize:total/pageSize+1;//总页数
-        users.add(TableUtil.createTableDate(total,pageNo,totalPage));
+        users.add(TableUtil.createTableDate(total,pageNum,totalPage));
         return users;
     }
 
@@ -75,7 +78,7 @@ public class UserController {
     @ApiOperation(value = "获取所有用户",notes = "获取所有用户")
     public List<Object> getAllUser(){
         List<Object> list = new ArrayList<>();
-        Iterable<User> users = userDao.findAll();
+       Iterable<User> users = userDao.findAll();
         for (User user : users){
             list.add(user);
         }
@@ -96,21 +99,39 @@ public class UserController {
 
     @RequestMapping(value = "/addUser",method = RequestMethod.POST)
     @ApiOperation(value = "user",notes = "新增用户")
-    public String addUser(User user) throws JSONException {
+    public String addUser(@RequestBody User user) throws JSONException {
+                String msg ="";
         if(user!=null){
-            userDao.save(user);
-            return  JsonUtil.returnStr(200,"新增用户成功");
+            if(!"".equals(user.getUserCode())&& user.getUserCode()!=null){
+                String password = MD5Util.getMd5(user.getUserCode(),user.getUserPsw());//加密用户密码
+                user.setUserPsw(password);
+                userDao.save(user);
+                msg = "新增用户成功";
+                return  JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,msg);
+            }else {
+                msg = "用户编号不能为空";
+                return  JsonUtil.returnStr(JsonUtil.RESULT_FAIL,msg);
+            }
         }
-        return JsonUtil.returnStr(500,"新增用户失败");
+        msg = "新增用户失败";
+        return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,msg);
     }
-    @RequestMapping(value = "/updateUser",method = RequestMethod.POST)
+    @RequestMapping(value = "/editUser",method = RequestMethod.POST)
     @ApiOperation(value = "user",notes = "修改用户")
-    public String updateUser(User user) throws JSONException {
+    public String editUser(@RequestBody User user) throws JSONException {
+                String msg = "";
         if(user!=null){
-            userDao.save(user);
-            return  JsonUtil.returnStr(200,"修改用户成功");
+            User oldUser = userDao.getUserByUserCode(user.getUserCode());//修改的用户是否存在
+            if(oldUser!=null){
+                String pasword = MD5Util.getMd5(user.getUserCode(),user.getUserPsw());
+                user.setUserPsw(pasword);
+                userDao.save(user);
+                msg = "修改用户成功";
+                return  JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,msg);
+            }
         }
-        return JsonUtil.returnStr(500,"修改用户失败");
+        msg = "修改用户失败";
+        return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,msg);
     }
     @RequestMapping(value = "/deleteUser",method = RequestMethod.POST)
     @ApiOperation(value = "userode",notes = "根据用户编号删除用户")
@@ -139,5 +160,26 @@ public class UserController {
                     return JsonUtil.returnStr(200,"批量删除用户成功");
                 }
                 return JsonUtil.returnStr(500,"批量删除用户失败");
+    }
+
+    @RequestMapping(value = "/changeUserState",method = RequestMethod.POST)
+    @ApiOperation(value = "String userCodes[]",notes = "单个或多个改变用户账号状态")
+    public Object changeUserState(
+            @RequestParam("userCodes") String [] userCodes,
+            @RequestParam("state")int state) throws JSONException {
+                String msg="";
+                for (String userCode:userCodes){
+                    try {
+                        User user = userDao.getUserByUserCode(userCode);
+                        user.setState(state);
+                        userDao.save(user);
+                        msg +=userCode+"、";
+                    }catch (Exception e){
+                        e.printStackTrace();
+                        return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"用户"+userCode+"修改状态失败");
+                    }
+                }
+                msg = msg.substring(0,msg.length()>0?msg.length()-1:msg.length());
+                return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"修改用户"+msg+"状态成功");
     }
 }

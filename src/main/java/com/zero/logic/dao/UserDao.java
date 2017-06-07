@@ -5,8 +5,9 @@ package com.zero.logic.dao;/**
 import com.zero.logic.domain.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
-
+import org.springframework.data.repository.query.Param;
 
 
 /**
@@ -33,5 +34,8 @@ public interface UserDao extends CrudRepository<User,Integer> {
      */
     public Page<User> findAll(Pageable pageable);
 
+
+    @Query(value = "SELECT t FROM sys_user t WHERE t.USERCODE LIKE %:keyWord% OR t.USERNAME LIKE %:keyWord%")
+    public Page<User> findByUserCode(@Param("userCode")String keyWord, Pageable pageable);
 
 }

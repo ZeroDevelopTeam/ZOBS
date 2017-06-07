@@ -70,16 +70,17 @@
             <artifactId>springfox-swagger-ui</artifactId>
             <version>2.6.1</version>
         </dependency>
-        <!-- json依赖-->
         <dependency>
-            <groupId>com.vaadin.external.google</groupId>
-            <artifactId>android-json</artifactId>
-            <version>RELEASE</version>
+            <groupId>net.sf.json-lib</groupId>
+            <artifactId>json-lib</artifactId>
+            <version>2.4</version>
+            <classifier>jdk15</classifier>
         </dependency>
+        <!-- json依赖-->
     </dependencies>
 
     <build>
-        <finalName>shop</finalName>
+        <finalName>ZOBS</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

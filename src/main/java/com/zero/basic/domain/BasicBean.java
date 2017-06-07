@@ -1,56 +1,55 @@
-package com.zero.basic.domain;/**
- * Created by Admin on 2017/6/1.
- */
-
+package com.zero.basic.domain;
+import javax.naming.NamingEnumeration;
 import javax.persistence.*;
 import java.util.Date;
 
 /**
- * 基础类
+ * 基础实体类
  *
  * @autherAdmin Deram Zhao
  * @creat 2017/6/1
  */
 @MappedSuperclass
 public class BasicBean {
-    private String createuser;
+    @Column(name = "CREATEUSER")
+    private String createUser;
+    @Column(name = "CREATEDATE")
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "CREATDATE")
-    private Date createdate;
-    @Temporal(TemporalType.TIMESTAMP)
+    private Date createDate;
     @Column(name = "UPDATEDATE")
-    private Date updatedate;
-    private String updateuser;
+    private Date updateDate;
+    @Column(name = "UPDATEUSER")
+    private String updateUser;
 
-    public String getCreateuser() {
-        return createuser;
+    public String getCreateUser() {
+        return createUser;
     }
 
-    public void setCreateuser(String createuser) {
-        this.createuser = createuser;
+    public void setCreateUser(String createUser) {
+        this.createUser = createUser;
     }
 
-    public Date getCreatedate() {
-        return createdate;
+    public Date getCreateDate() {
+        return createDate;
     }
 
-    public void setCreatedate(Date createdate) {
-        this.createdate = createdate;
+    public void setCreateDate(Date createDate) {
+        this.createDate = createDate;
     }
 
-    public Date getUpdatedate() {
-        return updatedate;
+    public Date getUpdateDate() {
+        return updateDate;
     }
 
-    public void setUpdatedate(Date updatedate) {
-        this.updatedate = updatedate;
+    public void setUpdateDate(Date updateDate) {
+        this.updateDate = updateDate;
     }
 
-    public String getUpdateuser() {
-        return updateuser;
+    public String getUpdateUser() {
+        return updateUser;
     }
 
-    public void setUpdateuser(String updateuser) {
-        this.updateuser = updateuser;
+    public void setUpdateUser(String updateUser) {
+        this.updateUser = updateUser;
     }
 }
