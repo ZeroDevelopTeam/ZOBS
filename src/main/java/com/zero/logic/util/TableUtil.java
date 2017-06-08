@@ -2,6 +2,9 @@ package com.zero.logic.util;/**
  * Created by Admin on 2017/6/2.
  */
 
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,12 +22,14 @@ public class TableUtil {
      * @param totalPage 总页数
      * @return 分页信息
      */
-    public static Object createTableDate(long total,int currentPage,long totalPage){
+    public static String createTableDate(Object obj,long total,int currentPage,long totalPage,long pageSize){
 
-        Map map = new HashMap();
-        map.put("currentPage", currentPage);
-        map.put("totalPage", totalPage);
-        map.put("total", total);
-        return map;
+        JSONObject json = new JSONObject();
+        json.put("currentPage", currentPage);
+        json.put("totalPage", totalPage);
+        json.put("pageSize",pageSize);
+        json.put("total", total);
+        json.put("list", JSONArray.fromObject(obj));
+        return json.toString();
     }
 }

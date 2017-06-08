@@ -2,8 +2,8 @@ package com.zero.logic.domain;/**
  * Created by Admin on 2017/6/6.
  */
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.naming.NamingEnumeration;
+import javax.persistence.*;
 
 /**
  * 用户角色类
@@ -11,9 +11,15 @@ import javax.persistence.Table;
  * @autherAdmin Deram Zhao
  * @creat 2017/6/6
  */
-
+@Entity
+@IdClass(UserRolePK.class)
+@Table(name = "sys_user_role")
 public class UserRole {
+    @Id
+    @Column(name = "USERCODE")
     private String userCode;//用户编号
+    @Id
+    @Column(name = "ROLEID")
     private String roleId;//角色id
 
     public String getUserCode() {

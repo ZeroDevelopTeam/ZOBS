@@ -16,11 +16,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
 
 /**
  * 用户控制类
@@ -38,11 +36,11 @@ public class UserController {
     @ApiOperation(value = "分页获取用户",notes = "分页获取用户")
     public String getByPage(
             @RequestParam("keyWord")String keyWord,
-            @RequestParam(value = "pageNumber", defaultValue = "0") Integer pageNumber,
+            @RequestParam(value = "pageNum", defaultValue = "0") Integer pageNum,
             @RequestParam(value = "pageSize", defaultValue = "15") Integer pageSize){
         String result = "";
         Sort sort = new Sort(Sort.Direction.DESC, "userCode");
-        Pageable pageable = new PageRequest(pageNumber-1 , pageSize, sort);
+        Pageable pageable = new PageRequest(pageNum-1 , pageSize, sort);
         Page<User> users = userDao.findByUserName(keyWord,pageable);
         List<Object> list = new ArrayList<>();
         for(User user:users){
@@ -50,8 +48,7 @@ public class UserController {
         }
         long total = userDao.count(keyWord);//获取查询总数
         long totalPage = total%pageSize==0? total/pageSize:total/pageSize+1;//总页数
-        list.add(TableUtil.createTableDate(total,pageNumber,totalPage));
-        result = JsonUtil.fromArray(list);
+        result = TableUtil.createTableDate(list,total,pageNum,totalPage,pageSize);
         return result;
     }
 
@@ -59,15 +56,14 @@ public class UserController {
     @ApiOperation(value = "获取所有用户",notes = "获取所有用户")
     public String getAllUser(){
         String result = "";
+        long total=0;
         List<Object> list = new ArrayList<>();
        Iterable<User> users = userDao.findAll();
         for (User user : users){
             list.add(user);
         }
-        Map map = new HashMap();
-        map.put("total",list.size());
-        list.add(map);
-        result = JsonUtil.fromArray(list);
+        total = list.size();
+        result = TableUtil.createTableDate(list,total,0,0,0);
         return result;
     }
 
@@ -118,7 +114,7 @@ public class UserController {
         msg = "修改用户失败";
         return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,msg);
     }
-    @RequestMapping(value = "/deleteUser",method = RequestMethod.POST)
+    @RequestMapping(value = "/deleteUser",method = RequestMethod.GET)
     @ApiOperation(value = "userode",notes = "根据用户编号删除用户")
     public String deleteUser(
             @ApiParam(required=true,name="userCode", value="用户编号")
@@ -144,10 +140,11 @@ public class UserController {
         msg = "删除用户失败";
         return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,msg);
     }
-    @RequestMapping(value = "/deleteUsers",method = RequestMethod.POST)
+    @RequestMapping(value = "/deleteUsers",method = RequestMethod.GET)
     @ApiOperation(value = "str_userCode",notes = "根据用户编号批量删除用户")
-    public String deleteUsers(String str_userCode) throws JSONException {
+    public String deleteUsers(String str_userCode) {
                 String msg = "";
+
                 String []userCodes = str_userCode.split(",");
                 for(String userCode:userCodes){
                     try {
@@ -162,7 +159,7 @@ public class UserController {
                 return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,msg);
     }
 
-    @RequestMapping(value = "/changeUserState",method = RequestMethod.POST)
+    @RequestMapping(value = "/changeUserState",method = RequestMethod.GET)
     @ApiOperation(value = "String userCodes[]",notes = "修改单个或多个用户账号状态")
     public String changeUserState(
             @RequestParam("userCodes") String [] userCodes,
