@@ -14,6 +14,7 @@ import javax.persistence.Table;
  * @autherAdmin Deram Zhao
  * @creat 2017/6/8
  */
+
 @Entity
 @Table(name = "sys_role")
 public class Role {

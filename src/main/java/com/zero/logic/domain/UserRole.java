@@ -37,4 +37,5 @@ public class UserRole {
     public void setRoleId(String roleId) {
         this.roleId = roleId;
     }
+
 }

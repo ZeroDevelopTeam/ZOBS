@@ -71,6 +71,7 @@ public class RoleController {
         return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,msg);
     }
 
+
     @RequestMapping(value = "getRoleList",method = RequestMethod.GET)
     @ApiOperation(value = "获取所有角色",notes = "获取所有角色信息")
     public String getRoleList(){

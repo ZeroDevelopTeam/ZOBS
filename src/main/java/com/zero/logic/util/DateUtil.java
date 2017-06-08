@@ -21,6 +21,7 @@ public class DateUtil {
     public static final DateFormat FORMAT4 = new SimpleDateFormat("yyyy-MM");
     public static final DateFormat FORMAT5 = new SimpleDateFormat("HH:mm:ss");
 
+
     /**
      *  将字符串格式的日期转成日期类型
      * @param format 格式

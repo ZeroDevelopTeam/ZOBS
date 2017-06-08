@@ -30,6 +30,7 @@ import java.util.List;
 @RequestMapping("/user")
 public class UserController {
 
+
     @Autowired
     private UserDao userDao;
     @RequestMapping(value = "getByPage",method = RequestMethod.GET)

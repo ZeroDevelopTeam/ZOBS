@@ -10,6 +10,7 @@ import java.io.Serializable;
  * @autherAdmin Deram Zhao
  * @creat 2017/6/8
  */
+
 public class UserRolePK implements Serializable {
     private String userCode;//用户编号
     private String roleId;//角色id

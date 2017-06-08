@@ -33,6 +33,7 @@ public interface RoleDao extends CrudRepository<Role,Integer> {
    @Query("select t from Role t where t.roleName like %?1% or t.roleId like %?1% or t.roleDesc like %?1%")
    public Page<Role> findByRoleName(@Param("keyWord") String keyWord, Pageable pageable);
 
+
     /**
      * 获取模糊查询记录数
      * @param keyWord

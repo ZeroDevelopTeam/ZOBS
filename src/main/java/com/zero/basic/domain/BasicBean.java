@@ -21,6 +21,7 @@ public class BasicBean {
     @Column(name = "UPDATEUSER")
     private String updateUser;
 
+
     public String getCreateUser() {
         return createUser;
     }

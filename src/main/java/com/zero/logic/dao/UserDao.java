@@ -32,6 +32,7 @@ public interface UserDao extends CrudRepository<User,Integer> {
 
     public User getUserByUserCode(String userCode);
 
+
     /**
      * 模糊查询分页
      * @param keyWord

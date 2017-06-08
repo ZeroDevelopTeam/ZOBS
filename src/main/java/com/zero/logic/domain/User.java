@@ -15,6 +15,7 @@ import javax.persistence.*;
 @Table(name = "sys_user")
 public class User extends BasicBean{
 
+
     @Id
     @Column(name = "USERCODE")
     private String userCode;//用户编号
