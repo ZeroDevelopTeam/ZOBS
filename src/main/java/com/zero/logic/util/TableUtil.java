@@ -19,7 +19,7 @@ public class TableUtil {
      * @param totalPage 总页数
      * @return 分页信息
      */
-    public static Object createTableDate(int total,int currentPage,int totalPage){
+    public static Object createTableDate(long total,int currentPage,long totalPage){
 
         Map map = new HashMap();
         map.put("currentPage", currentPage);

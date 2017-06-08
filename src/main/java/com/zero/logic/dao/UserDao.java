@@ -3,11 +3,15 @@ package com.zero.logic.dao;/**
  */
 
 import com.zero.logic.domain.User;
+import org.hibernate.sql.Select;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
+
+import javax.transaction.Transactional;
 
 
 /**
@@ -25,17 +29,32 @@ public interface UserDao extends CrudRepository<User,Integer> {
      * @param userCode
      * @return user
      */
+
     public User getUserByUserCode(String userCode);
 
     /**
-     * 实现分页功能
+     * 模糊查询分页
+     * @param keyWord
      * @param pageable
+     * @return users
+     */
+    @Query("select t from User t where t.userName like %?1% or t.userCode like %?1% or t.address like %?1% or t.phone like %?1% ")
+    public Page<User> findByUserName(@Param("keyWord")String keyWord,Pageable pageable);
+
+    /**
+     * 根据用户编号删除用户
+     * @param userCode
+     */
+    @Modifying
+    @Transactional
+    @Query("delete  from User t where t.userCode =:userCode")
+    public void deleteByUserCode(@Param("userCode") String userCode);
+
+    /**
+     * 获取模糊查询记录数
+     * @param keyWord
      * @return
      */
-    public Page<User> findAll(Pageable pageable);
-
-
-    @Query(value = "SELECT t FROM sys_user t WHERE t.USERCODE LIKE %:keyWord% OR t.USERNAME LIKE %:keyWord%")
-    public Page<User> findByUserCode(@Param("userCode")String keyWord, Pageable pageable);
-
+    @Query("select count(*) from User t where t.userName like %?1% or t.userCode like %?1% or t.address like %?1% or t.phone like %?1%" )
+    public long count(@Param("keyWord")String keyWord);
 }

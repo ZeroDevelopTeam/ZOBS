@@ -3,9 +3,7 @@ package com.zero.logic.controller;/**
  */
 
 import com.zero.logic.dao.UserDao;
-import com.zero.logic.dao.UserDaoService;
 import com.zero.logic.domain.User;
-import com.zero.logic.util.JDBCUtil;
 import com.zero.logic.util.JsonUtil;
 import com.zero.logic.util.MD5Util;
 import com.zero.logic.util.TableUtil;
@@ -36,47 +34,31 @@ public class UserController {
 
     @Autowired
     private UserDao userDao;
-    @Autowired
-    private UserDaoService userDaoService;
-    @RequestMapping(value = "getUserByPage",method = RequestMethod.GET)
+    @RequestMapping(value = "getByPage",method = RequestMethod.GET)
     @ApiOperation(value = "分页获取用户",notes = "分页获取用户")
-    public List<Object> getUserByPage(
-            @RequestParam(value = "page", defaultValue = "0") Integer pageNum,
-            @RequestParam(value = "size", defaultValue = "15") Integer pageSize){
+    public String getByPage(
+            @RequestParam("keyWord")String keyWord,
+            @RequestParam(value = "pageNumber", defaultValue = "0") Integer pageNumber,
+            @RequestParam(value = "pageSize", defaultValue = "15") Integer pageSize){
+        String result = "";
         Sort sort = new Sort(Sort.Direction.DESC, "userCode");
-        Pageable pageable = new PageRequest(pageNum-1 , pageSize, sort);
-        Page<User> users = userDao.findAll(pageable);
-
+        Pageable pageable = new PageRequest(pageNumber-1 , pageSize, sort);
+        Page<User> users = userDao.findByUserName(keyWord,pageable);
         List<Object> list = new ArrayList<>();
         for(User user:users){
             list.add(user);
         }
-
-        int total = JDBCUtil.getCount(JDBCUtil.getConn(),"sys_user");//获取总用户数
-        int totalPage = total%pageSize==0? total/pageSize:total/pageSize+1;//总页数
-        list.add(TableUtil.createTableDate(total,pageNum,totalPage));
-        return list;
-    }
-
-    /**
-     *原生查询  之后再改
-     */
-    @RequestMapping(value = "getByPage",method = RequestMethod.GET)
-    @ApiOperation(value = "模糊查询分页获取用户",notes = "模糊查询分页获取用户")
-    public List<Object> getByPage(
-            @RequestParam("keyWord")String keyWord,
-            @RequestParam("pageNum")int pageNum,
-            @RequestParam("pageSize")int pageSize){
-        List<Object> users = userDaoService.getUserByPage(keyWord,pageNum,pageSize);
-        int total = userDaoService.getTotalCount(keyWord);//获取模糊查询用户总数
-        int totalPage = total%pageSize==0? total/pageSize:total/pageSize+1;//总页数
-        users.add(TableUtil.createTableDate(total,pageNum,totalPage));
-        return users;
+        long total = userDao.count(keyWord);//获取查询总数
+        long totalPage = total%pageSize==0? total/pageSize:total/pageSize+1;//总页数
+        list.add(TableUtil.createTableDate(total,pageNumber,totalPage));
+        result = JsonUtil.fromArray(list);
+        return result;
     }
 
     @RequestMapping(value = "/getAllUser",method = RequestMethod.GET)
     @ApiOperation(value = "获取所有用户",notes = "获取所有用户")
-    public List<Object> getAllUser(){
+    public String getAllUser(){
+        String result = "";
         List<Object> list = new ArrayList<>();
        Iterable<User> users = userDao.findAll();
         for (User user : users){
@@ -85,21 +67,24 @@ public class UserController {
         Map map = new HashMap();
         map.put("total",list.size());
         list.add(map);
-        return list;
+        result = JsonUtil.fromArray(list);
+        return result;
     }
 
     @RequestMapping(value = "/getUserByUserCode",method = RequestMethod.GET)
     @ApiOperation(value = "获取用户",notes = "根据用户编号获取所有用户")
-    public User getUserByUserCode(
+    public String getUserByUserCode(
             @ApiParam(required=true,name="userCode", value="用户编号")
             @RequestParam("userCode")String userCode){
+        String result = "";
         User user = userDao.getUserByUserCode(userCode);
-        return user;
+        result = JsonUtil.fromObject(user);
+        return result;
     }
 
     @RequestMapping(value = "/addUser",method = RequestMethod.POST)
     @ApiOperation(value = "user",notes = "新增用户")
-    public String addUser(@RequestBody User user) throws JSONException {
+    public String addUser(@RequestBody User user) {
                 String msg ="";
         if(user!=null){
             if(!"".equals(user.getUserCode())&& user.getUserCode()!=null){
@@ -118,7 +103,7 @@ public class UserController {
     }
     @RequestMapping(value = "/editUser",method = RequestMethod.POST)
     @ApiOperation(value = "user",notes = "修改用户")
-    public String editUser(@RequestBody User user) throws JSONException {
+    public String editUser(@RequestBody User user)  {
                 String msg = "";
         if(user!=null){
             User oldUser = userDao.getUserByUserCode(user.getUserCode());//修改的用户是否存在
@@ -137,34 +122,49 @@ public class UserController {
     @ApiOperation(value = "userode",notes = "根据用户编号删除用户")
     public String deleteUser(
             @ApiParam(required=true,name="userCode", value="用户编号")
-            @RequestParam("userCode")String userCode) throws JSONException {
-        if(!"".equals(userCode)){
-            User user = userDao.getUserByUserCode(userCode);
-            if(user!=null){
-                userDao.delete(user);
-                return JsonUtil.returnStr(200,"删除用户成功");
+            @RequestParam("userCode")String userCode){
+        String msg = "";
+        try {
+            if(!"".equals(userCode)){
+                User user = userDao.getUserByUserCode(userCode);
+                if(user!=null){
+                    userDao.delete(user);
+                    msg = "删除用户成功";
+                    return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,msg);
+                }
+            }else {
+                msg = "请输入要删除的用户编码";
+                return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,msg);
             }
+        }catch (Exception e){
+            e.printStackTrace();
+            msg = "删除用户失败";
+            return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,msg);
         }
-        return JsonUtil.returnStr(500,"删除用户失败");
+        msg = "删除用户失败";
+        return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,msg);
     }
     @RequestMapping(value = "/deleteUsers",method = RequestMethod.POST)
     @ApiOperation(value = "str_userCode",notes = "根据用户编号批量删除用户")
     public String deleteUsers(String str_userCode) throws JSONException {
-                List<User> users = new ArrayList<>();
+                String msg = "";
                 String []userCodes = str_userCode.split(",");
                 for(String userCode:userCodes){
-                    users.add(userDao.getUserByUserCode(userCode));
+                    try {
+                        userDao.deleteByUserCode(userCode);
+                    }catch (Exception e){
+                        e.printStackTrace();
+                        msg = "删除用户"+userCode+"失败";
+                        return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,msg);
+                    }
                 }
-                if(users.size()>0){
-                    userDao.delete(users);
-                    return JsonUtil.returnStr(200,"批量删除用户成功");
-                }
-                return JsonUtil.returnStr(500,"批量删除用户失败");
+                msg = "批量删除用户成功";
+                return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,msg);
     }
 
     @RequestMapping(value = "/changeUserState",method = RequestMethod.POST)
-    @ApiOperation(value = "String userCodes[]",notes = "单个或多个改变用户账号状态")
-    public Object changeUserState(
+    @ApiOperation(value = "String userCodes[]",notes = "修改单个或多个用户账号状态")
+    public String changeUserState(
             @RequestParam("userCodes") String [] userCodes,
             @RequestParam("state")int state) throws JSONException {
                 String msg="";
@@ -173,13 +173,13 @@ public class UserController {
                         User user = userDao.getUserByUserCode(userCode);
                         user.setState(state);
                         userDao.save(user);
-                        msg +=userCode+"、";
                     }catch (Exception e){
                         e.printStackTrace();
-                        return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"用户"+userCode+"修改状态失败");
+                        msg = "用户："+userCode+"状态修改失败";
+                        return  JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,msg);
                     }
                 }
-                msg = msg.substring(0,msg.length()>0?msg.length()-1:msg.length());
-                return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"修改用户"+msg+"状态成功");
+                msg = "用户状态修改成功";
+                return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,msg);
     }
 }

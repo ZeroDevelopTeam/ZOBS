@@ -3,19 +3,15 @@ package com.zero.logic.controller;/**
  */
 
 import com.zero.logic.dao.UserDao;
-import com.zero.logic.dao.UserDaoService;
 import com.zero.logic.domain.Login;
 import com.zero.logic.domain.User;
 import com.zero.logic.util.JsonUtil;
 import com.zero.logic.util.MD5Util;
 import io.swagger.annotations.ApiOperation;
-import org.hibernate.engine.query.spi.ReturnMetadata;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -29,9 +25,6 @@ import java.util.Map;
 public class LoginController {
     @Autowired
     private UserDao userDao;
-    @Autowired
-    private UserDaoService userDaoService;
-
     @RequestMapping(value = "login",method = RequestMethod.POST)
     @ApiOperation(value = "登录系统",notes = "登录系统")
     public String login(@RequestBody Login login){

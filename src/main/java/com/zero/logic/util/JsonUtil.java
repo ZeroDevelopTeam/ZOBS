@@ -3,10 +3,12 @@ package com.zero.logic.util;/**
  */
 
 ;
+import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 /**
  * json格式
@@ -35,9 +37,6 @@ public class JsonUtil {
     }
 
 
-
-
-
     /**
      * 将对象转换成JSON,添加新的键值
      * @param obj  对象
@@ -52,5 +51,15 @@ public class JsonUtil {
             jsonObject.put(entry.getKey(), entry.getValue());
         }
         return jsonObject.toString();
+    }
+
+    /**
+     * 将对象转换成JSONArray
+     * @param obj
+     * @return JSONArray类型的字符串
+     */
+    public static String fromArray(List<Object> obj){
+        JSONArray jSONArray = JSONArray.fromObject(obj);
+        return jSONArray.toString();
     }
 }
