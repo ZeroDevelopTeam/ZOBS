@@ -1,6 +1,6 @@
-package com.zero.logic.domain;/**
- * Created by Admin on 2017/6/9.
- */
+package com.zero.logic.domain;
+
+import com.zero.basic.domain.BasicBean;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -8,25 +8,30 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
- * 权限类
- *
- * @autherAdmin Deram Zhao
- * @creat 2017/6/9
+ * 权限实体类
+ * @auther Deram Zhao
+ * @creatTime 2017/6/9
  */
 @Entity
 @Table(name = "sys_purview")
-public class Purview {
+public class Purview extends BasicBean {
     @Id
     @Column(name = "PURVIEWID")
-    private String purviewId;//权限编号
+    //权限编号
+    private String purviewId;
     @Column(name = "PURVIEWNAME")
-    private String purviewName;//权限名称
+    //权限名称
+    private String purviewName;
     @Column(name = "PURVIEWRULE")
-    private String purviewRule;//权限规则
+    //权限规则
+    private String purviewRule;
     @Column(name = "PURVIEWDESC")
-    private String purviewDesc;//权限备注
-    private int state;//权限状态
-
+    //权限备注
+    private String purviewDesc;
+    @Column(name = "STATE")
+    //权限状态
+    private int state;
+    //getter和setter方法
     public String getPurviewId() {
         return purviewId;
     }

@@ -1,6 +1,4 @@
-package com.zero;/**
- * Created by Admin on 2017/5/27.
- */
+package com.zero;
 
 import com.google.common.base.Predicate;
 import org.springframework.boot.autoconfigure.web.BasicErrorController;
@@ -16,15 +14,14 @@ import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 /**
- * Swagger配置类
- *
- * @autherAdmin Deram Zhao
- * @creat 2017/5/27
+ * SwaggerUI 配置类
+ * @auther Deram Zhao
+ * @creatTime 2017/5/27
  */
 @Configuration
 @EnableSwagger2
+//访问地址：http://ip:port/swagger-ui.html
 public class SwaggerConfig {
-
     @Bean
     public Docket createRestApi() {
         Predicate<RequestHandler> predicate = new Predicate<RequestHandler>() {
@@ -50,8 +47,10 @@ public class SwaggerConfig {
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-                .title("BFW All Rest Controller")//大标题
-                .version("1.0")//版本
+                //大标题
+                .title("ZOBS All Rest Controller")
+                //版本
+                .version("1.0")
                 .build();
     }
 }

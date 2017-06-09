@@ -1,13 +1,12 @@
 package com.zero.basic.domain;
-import javax.naming.NamingEnumeration;
+
 import javax.persistence.*;
 import java.util.Date;
 
 /**
  * 基础实体类
- *
- * @autherAdmin Deram Zhao
- * @creat 2017/6/1
+ * @auther Deram Zhao
+ * @creatTime 2017/6/1
  */
 @MappedSuperclass
 public class BasicBean {
@@ -21,7 +20,7 @@ public class BasicBean {
     @Column(name = "UPDATEUSER")
     private String updateUser;
 
-
+    //getter和setter方法
     public String getCreateUser() {
         return createUser;
     }

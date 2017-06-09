@@ -1,6 +1,4 @@
-package com.zero;/**
- * Created by Admin on 2017/6/1.
- */
+package com.zero;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -8,9 +6,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
  * 程序入口类
- *
- * @autherAdmin Deram Zhao
- * @creat 2017/6/1
+ * @auther Deram Zhao
+ * @creatTime 2017/6/1
  */
 @SpringBootApplication
 public class Application {
