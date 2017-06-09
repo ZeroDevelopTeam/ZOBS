@@ -3,7 +3,6 @@ package com.zero.logic.dao;/**
  */
 
 import com.zero.logic.domain.User;
-import org.hibernate.sql.Select;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
@@ -20,7 +19,6 @@ import javax.transaction.Transactional;
  * @autherAdmin Deram Zhao
  * @creat 2017/6/1
  */
-
 
 public interface UserDao extends CrudRepository<User,Integer> {
 
@@ -59,6 +57,5 @@ public interface UserDao extends CrudRepository<User,Integer> {
     @Transactional
     @Query("delete  from User t where t.userCode =:userCode")
     public void deleteByUserCode(@Param("userCode") String userCode);
-
 
 }

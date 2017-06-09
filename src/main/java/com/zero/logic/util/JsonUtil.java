@@ -63,4 +63,19 @@ public class JsonUtil {
         JSONArray jSONArray = JSONArray.fromObject(obj);
         return jSONArray.toString();
     }
+
+    /**
+     * 获取JSON对象中的值
+     * @param key 字段
+     * @param obj 对象
+     * @return 字符串值
+     */
+    public static String getString(String key,Object obj){
+        JSONObject jsonObject=JSONObject.fromObject(obj);
+        if(jsonObject.containsKey(key)){
+            return jsonObject.getString(key);
+        }else{
+            return null;
+        }
+    }
 }
