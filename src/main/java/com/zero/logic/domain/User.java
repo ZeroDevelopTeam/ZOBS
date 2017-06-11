@@ -1,33 +1,40 @@
-package com.zero.logic.domain;/**
- * Created by Admin on 2017/6/1.
- */
+package com.zero.logic.domain;
 
 import com.zero.basic.domain.BasicBean;
 import javax.persistence.*;
 
 /**
- * 用户类
- *
- * @autherAdmin Deram Zhao
- * @creat 2017/6/1
+ * 用户实体类
+ * @auther Deram Zhao
+ * @creatTime 2017/6/1
  */
 @Entity
 @Table(name = "sys_user")
 public class User extends BasicBean{
-
-
     @Id
     @Column(name = "USERCODE")
-    private String userCode;//用户编号
+    //用户编号
+    private String userCode;
     @Column(name = "USERNAME")
-    private String userName;//用户名
+    //用户名
+    private String userName;
     @Column(name = "USERPSW")
-    private String userPsw;//密码
-    private String phone;//联系电话
-    private String address;//用户地址
-    private int state;//0为停用、1为启用
-    private String email;//用户邮箱
+    //密码
+    private String userPsw;
+    //联系电话
+    @Column(name = "PHONE")
+    private String phone;
+    //用户地址
+    @Column(name = "ADDRESS")
+    private String address;
+    //0为停用、1为启用
+    @Column(name = "STATE")
+    private int state;
+    //用户邮箱
+    @Column(name = "EMAIL")
+    private String email;
 
+    //getter和setter方法
     public String getUserCode() {
         return userCode;
     }

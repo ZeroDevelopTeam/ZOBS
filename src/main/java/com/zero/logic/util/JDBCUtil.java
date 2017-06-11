@@ -1,28 +1,22 @@
-package com.zero.logic.util;/**
- * Created by Admin on 2017/6/2.
- */
+package com.zero.logic.util;
 
-import org.hibernate.loader.custom.Return;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 
-import java.io.IOException;
 import java.sql.*;
 import java.util.Properties;
 
 /**
  * 数据库连接类
- *
- * @autherAdmin Deram Zhao
- * @creat 2017/6/2
+ * @auther Deram Zhao
+ * @creatTime 2017/6/2
  */
 public class JDBCUtil {
 
     /**
      * 获取数据库连接
-     * @return
+     * @return 数据库连接
      */
     public static Connection getConn(){
         Properties propes;
@@ -44,10 +38,10 @@ public class JDBCUtil {
 
 
     /**
-     *
-     * @param conn
-     * @param tableName
-     * @return
+     * 根据表名获取表的记录数目
+     * @param conn 数据源链接
+     * @param tableName 表名
+     * @return 数目
      */
     public static int getCount(Connection conn, String tableName) {
         int total = 0;

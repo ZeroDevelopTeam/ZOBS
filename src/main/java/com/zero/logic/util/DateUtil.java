@@ -1,6 +1,4 @@
-package com.zero.logic.util;/**
- * Created by Admin on 2017/6/7.
- */
+package com.zero.logic.util;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -9,9 +7,8 @@ import java.util.Date;
 
 /**
  * 日期格式工具类
- *
- * @autherAdmin Deram Zhao
- * @creat 2017/6/7
+ * @auther Deram Zhao
+ * @creatTime 2017/6/7
  */
 public class DateUtil {
     //格式常量
@@ -27,8 +24,20 @@ public class DateUtil {
      * @param format 格式
      * @param dateStr 字符串日期
      * @return 日期类型
+     * @throws ParseException
      */
     public static Date parse(DateFormat format, String dateStr) throws ParseException {
         return format.parse(dateStr);
+    }
+
+    /**
+     *  将日期类型转成字符串格式的日期
+     * @param format 格式
+     * @param date 日期
+     * @return 字符串日期类型
+     * @throws ParseException
+     */
+    public static String formatDate(DateFormat format,Date date)throws ParseException{
+        return format.format(date);
     }
 }

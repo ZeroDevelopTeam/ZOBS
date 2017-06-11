@@ -1,6 +1,4 @@
-package com.zero.logic.dao;/**
- * Created by Admin on 2017/6/8.
- */
+package com.zero.logic.dao;
 
 import com.zero.logic.domain.Role;
 import org.springframework.data.domain.Page;
@@ -11,9 +9,8 @@ import org.springframework.data.repository.query.Param;
 
 /**
  * 角色类接口
- *
- * @autherAdmin Deram Zhao
- * @creat 2017/6/8
+ * @auther Deram Zhao
+ * @creatTime 2017/6/8
  */
 public interface RoleDao extends CrudRepository<Role,Integer> {
     /**

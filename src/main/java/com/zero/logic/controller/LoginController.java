@@ -36,13 +36,26 @@ public class LoginController {
         Map<String, Object> map = new HashMap<String, Object>();
              user = userDao.getUserByUserCode(login.getUserCode());
              if(user!=null){
-                 String userPsw = MD5Util.getMd5(login.getUserCode(),login.getUserPsw());
+                 String userPsw = null;
+                 try {
+                     userPsw = MD5Util.getMd5(login.getUserCode(),login.getUserPsw());
+                 } catch (Exception e) {
+                     e.printStackTrace();
+                 }
                  if(user.getUserPsw().equals(userPsw)){
                      msg = "登录成功";
                      user.setUserPsw("");//用户登录成功后返回一个user对象给前端时(不返回密码)
-                     map.put("user",JsonUtil.fromObject(user));
+                     try {
+                         map.put("user",JsonUtil.fromObject(user));
+                     } catch (Exception e) {
+                         e.printStackTrace();
+                     }
                      result = JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,msg);
-                     str =JsonUtil.makeJsonBeanByKey(result,map);
+                     try {
+                         str =JsonUtil.makeJsonBeanByKey(result,map);
+                     } catch (Exception e) {
+                         e.printStackTrace();
+                     }
                  }else {
                      msg = "密码不正确";
                      result = JsonUtil.returnStr(JsonUtil.RESULT_FAIL,msg);

@@ -1,32 +1,40 @@
-package com.zero.logic.domain;/**
- * Created by Admin on 2017/6/8.
- */
+package com.zero.logic.domain;
 
-import javax.naming.NamingEnumeration;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import com.zero.basic.domain.BasicBean;
+
+import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
- * 角色类
- *
- * @autherAdmin Deram Zhao
- * @creat 2017/6/8
+ * 角色实体类
+ * @auther Deram Zhao
+ * @creatTime 2017/6/8
  */
 
 @Entity
 @Table(name = "sys_role")
-public class Role {
+public class Role extends BasicBean {
     @Id
     @Column(name = "ROLEID")
-    private  String roleId;//角色编号
+    //角色编号
+    private String roleId;
     @Column(name = "ROLENAME")
-    private  String roleName;//角色名称
+    //角色名称
+    private String roleName;
     @Column(name = "ROLEDESC")
-    private  String roleDesc;//备注
-    private  int state;//0为停用、1为启用
+    //备注
+    private String roleDesc;
+    @Column(name = "STATE")
+    //0为停用、1为启用
+    private int state;
+    @ManyToMany
+    @JoinTable(name="sys_role_purview",
+               inverseJoinColumns=@JoinColumn(name="purviewId",referencedColumnName="purviewId"),
+               joinColumns=@JoinColumn(name="roleId",referencedColumnName="roleId"))
+    private Set<Purview> purviews=new HashSet<>();
 
+    //getter和setter方法
     public String getRoleId() {return roleId;}
 
     public void setRoleId(String roleId) {this.roleId = roleId;}
@@ -42,4 +50,12 @@ public class Role {
     public int getState() {return state;}
 
     public void setState(int state) {this.state = state;}
+
+    public Set<Purview> getPurviews() {
+        return purviews;
+    }
+
+    public void setPurviews(Set<Purview> set) {
+        this.purviews = purviews;
+    }
 }

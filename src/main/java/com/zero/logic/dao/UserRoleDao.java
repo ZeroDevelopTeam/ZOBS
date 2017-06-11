@@ -9,5 +9,5 @@ package com.zero.logic.dao;/**
  * @creat 2017/6/9
  */
 public interface UserRoleDao {
-    public  UserRole getUserRoleByUserCode(String userCode);
+   // public  UserRole getUserRoleByUserCode(String userCode);
 }

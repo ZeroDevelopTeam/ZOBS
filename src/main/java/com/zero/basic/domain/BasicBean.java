@@ -1,6 +1,9 @@
 package com.zero.basic.domain;
 
+import com.zero.logic.util.DateUtil;
+
 import javax.persistence.*;
+import java.text.ParseException;
 import java.util.Date;
 
 /**
@@ -29,16 +32,16 @@ public class BasicBean {
         this.createUser = createUser;
     }
 
-    public Date getCreateDate() {
-        return createDate;
+    public String getCreateDate() throws ParseException {
+        return DateUtil.formatDate(DateUtil.FORMAT2,createDate);
     }
 
     public void setCreateDate(Date createDate) {
         this.createDate = createDate;
     }
 
-    public Date getUpdateDate() {
-        return updateDate;
+    public String getUpdateDate() throws ParseException {
+        return DateUtil.formatDate(DateUtil.FORMAT2,updateDate);
     }
 
     public void setUpdateDate(Date updateDate) {

@@ -2,10 +2,7 @@ package com.zero.logic.domain;
 
 import com.zero.basic.domain.BasicBean;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 /**
  * 权限实体类
@@ -71,4 +68,5 @@ public class Purview extends BasicBean {
     public void setState(int state) {
         this.state = state;
     }
+
 }

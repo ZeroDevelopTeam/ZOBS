@@ -44,8 +44,12 @@ public class LogController {
         }
         long total = logDao.count(keyWord,type);//获取查询总数
         long totalPage = total%pageSize==0? total/pageSize:total/pageSize+1;//总页数
-        result = TableUtil.createTableDate(list,total,pageNum,totalPage,pageSize);
-        return result;
+       try {
+           result = TableUtil.createTableDate(list,total,pageNum,totalPage,pageSize);
+       } catch (Exception e) {
+           e.printStackTrace();
+       }
+       return result;
     }
 
     @RequestMapping(value = "/save",method = RequestMethod.POST)

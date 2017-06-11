@@ -1,6 +1,4 @@
-package com.zero.logic.dao;/**
- * Created by Admin on 2017/6/1.
- */
+package com.zero.logic.dao;
 
 import com.zero.logic.domain.User;
 import org.springframework.data.domain.Page;
@@ -15,11 +13,9 @@ import javax.transaction.Transactional;
 
 /**
  * 用户接口
- *
- * @autherAdmin Deram Zhao
- * @creat 2017/6/1
+ * @auther Deram Zhao
+ * @creatTime 2017/6/1
  */
-
 public interface UserDao extends CrudRepository<User,Integer> {
 
     /**

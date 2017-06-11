@@ -1,18 +1,12 @@
-package com.zero.logic.util;/**
- * Created by Admin on 2017/6/2.
- */
+package com.zero.logic.util;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * 表工具类
- *
- * @autherAdmin Deram Zhao
- * @creat 2017/6/2
+ * @auther Deram Zhao
+ * @creatTime 2017/6/2
  */
 public class TableUtil {
     /**
@@ -21,9 +15,9 @@ public class TableUtil {
      * @param currentPage 当前页
      * @param totalPage 总页数
      * @return 分页信息
+     * @throws Exception
      */
-    public static String createTableDate(Object obj,long total,int currentPage,long totalPage,long pageSize){
-
+    public static String createTableDate(Object obj,long total,int currentPage,long totalPage,long pageSize)throws Exception{
         JSONObject json = new JSONObject();
         json.put("currentPage", currentPage);
         json.put("totalPage", totalPage);
