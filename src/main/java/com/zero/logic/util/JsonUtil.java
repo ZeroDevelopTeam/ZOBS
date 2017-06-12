@@ -38,7 +38,7 @@ public class JsonUtil {
      * @return jsonObject类型的字符串
      * @throws Exception
      */
-    public static String fromObject(Object obj)throws Exception{
+    public static String fromObject(Object obj){
         JSONObject jsonObject = JSONObject.fromObject(obj);
         return jsonObject.toString();
     }

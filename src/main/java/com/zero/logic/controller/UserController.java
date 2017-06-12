@@ -1,8 +1,7 @@
-package com.zero.logic.controller;/**
- * Created by Admin on 2017/6/1.
- */
-
+package com.zero.logic.controller;
+import com.zero.logic.dao.RoleDao;
 import com.zero.logic.dao.UserDao;
+import com.zero.logic.domain.Role;
 import com.zero.logic.domain.User;
 import com.zero.logic.util.JsonUtil;
 import com.zero.logic.util.MD5Util;
@@ -33,13 +32,15 @@ public class UserController {
 
     @Autowired
     private UserDao userDao;
+    @Autowired
+    private RoleDao roleDao;
     @RequestMapping(value = "getByPage",method = RequestMethod.GET)
     @ApiOperation(value = "分页获取用户",notes = "分页获取用户")
     public String getByPage(
             @RequestParam("keyWord")String keyWord,
             @RequestParam(value = "pageNum", defaultValue = "0") Integer pageNum,
             @RequestParam(value = "pageSize", defaultValue = "15") Integer pageSize){
-        String result = "";
+        String result = null;
         Sort sort = new Sort(Sort.Direction.DESC, "userCode");
         Pageable pageable = new PageRequest(pageNum-1 , pageSize, sort);
         Page<User> users = userDao.findByUserName(keyWord,pageable);
@@ -81,26 +82,25 @@ public class UserController {
 
     @RequestMapping(value = "/addUser",method = RequestMethod.POST)
     @ApiOperation(value = "user",notes = "新增用户")
-    public String addUser(@RequestBody User user) {
-                String msg ="";
-        if(user!=null){
-            if(!"".equals(user.getUserCode())&& user.getUserCode()!=null){
-                String password = MD5Util.getMd5(user.getUserCode(),user.getUserPsw());//加密用户密码
-                user.setUserPsw(password);
-                userDao.save(user);
-                msg = "新增用户成功";
-                return  JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,msg);
-            }else {
-                msg = "用户编号不能为空";
-                return  JsonUtil.returnStr(JsonUtil.RESULT_FAIL,msg);
-            }
-        }
-        msg = "新增用户失败";
-        return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,msg);
+    public String addUser(@RequestBody User user,@RequestParam String [] roles){
+                try {
+                    for (String roleId:roles){
+                        Role role = roleDao.getRoleByRoleId(roleId);
+                        if (null!=role && role.getState()!=0 ){
+                            user.getRoles().add(role);
+                        }
+                    }
+                    userDao.save(user);
+                    return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS, "新增用户信息成功");
+                }catch (Exception e){
+                    e.printStackTrace();
+                    return JsonUtil.returnStr(JsonUtil.RESULT_FAIL, "新增用户信息成功");
+                }
     }
+
     @RequestMapping(value = "/editUser",method = RequestMethod.POST)
     @ApiOperation(value = "user",notes = "修改用户")
-    public String editUser(@RequestBody User user)  {
+    public String editUser(@RequestBody User user){
                 String msg = "";
         if(user!=null){
             User oldUser = userDao.getUserByUserCode(user.getUserCode());//修改的用户是否存在
@@ -164,7 +164,7 @@ public class UserController {
     @ApiOperation(value = "String userCodes[]",notes = "修改单个或多个用户账号状态")
     public String changeUserState(
             @RequestParam("userCodes") String [] userCodes,
-            @RequestParam("state")int state) throws JSONException {
+            @RequestParam("state")int state){
                 String msg="";
                 for (String userCode:userCodes){
                     try {

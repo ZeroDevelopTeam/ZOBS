@@ -1,7 +1,16 @@
 package com.zero.logic.domain;
 
 import com.zero.basic.domain.BasicBean;
+import org.hibernate.annotations.*;
 import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+
+
+import java.util.HashSet;
+import java.util.Set;
+
+import static org.hibernate.annotations.CascadeType.SAVE_UPDATE;
 
 /**
  * 用户实体类
@@ -33,6 +42,12 @@ public class User extends BasicBean{
     //用户邮箱
     @Column(name = "EMAIL")
     private String email;
+
+    @ManyToMany
+    @JoinTable(name="sys_role_purview",
+            inverseJoinColumns=@JoinColumn(name="roleId",referencedColumnName="roleId"),
+            joinColumns=@JoinColumn(name="userCode",referencedColumnName="userCode"))
+   private Set<Role> roles = new HashSet<>();
 
     //getter和setter方法
     public String getUserCode() {
@@ -90,5 +105,9 @@ public class User extends BasicBean{
     public void setEmail(String email) {
         this.email = email;
     }
+
+    public Set<Role> getRoles() {return roles;}
+
+    public void setRoles(Set<Role> set) {this.roles = roles;}
 
 }

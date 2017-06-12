@@ -1,7 +1,4 @@
-package com.zero.logic.dao;/**
- * Created by Admin on 2017/6/9.
- */
-
+package com.zero.logic.dao;
 import com.zero.logic.domain.Log;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

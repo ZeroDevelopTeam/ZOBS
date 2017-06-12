@@ -28,7 +28,7 @@ public class LogController {
     @Autowired
     private LogDao logDao;
    @RequestMapping(value = "/getByPage",method = RequestMethod.GET)
-    @ApiOperation(value = "分页获取日志",notes = "分页获取日志")
+   @ApiOperation(value = "分页获取日志",notes = "分页获取日志")
     public String getByPage(
             @RequestParam("keyWord")String keyWord,
             @RequestParam("type")int type,

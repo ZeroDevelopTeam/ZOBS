@@ -21,7 +21,7 @@ public class JDBCUtil {
     public static Connection getConn(){
         Properties propes;
         Connection conn = null;
-        Resource resource = new ClassPathResource("/application.properties");//
+        Resource resource = new ClassPathResource("/application.properties");//读取配置文件路径
         try {
             propes = PropertiesLoaderUtils.loadProperties(resource);
             String driver =propes.getProperty("spring.datasource.driver-class-name");
