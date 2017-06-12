@@ -1,4 +1,6 @@
-package com.zero.logic.controller;
+package com.zero.logic.controller;/**
+ * Created by Admin on 2017/6/1.
+ */
 
 import com.zero.logic.dao.UserDao;
 import com.zero.logic.domain.User;
@@ -20,32 +22,17 @@ import java.util.List;
 
 /**
  * 用户控制类
- * @auther Deram Zhao
- * @creatTime 2017/6/1
+ *
+ * @autherAdmin Deram Zhao
+ * @creat 2017/6/1
  */
 @RestController
 @RequestMapping("/user")
 public class UserController {
+
+
     @Autowired
     private UserDao userDao;
-
-    @RequestMapping(value = "/addUser",method = RequestMethod.POST)
-    @ApiOperation(value = "user",notes = "新增用户")
-    public String addUser(@RequestBody User user) {
-        try {
-            String password = MD5Util.getMd5(user.getUserCode(),user.getUserPsw());//加密用户密码
-            user.setUserPsw(password);
-            userDao.save(user);
-            return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"新增用户成功");
-        }catch(Exception e){
-            return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"新增用户失败");
-        }
-
-    }
-
-
-
-
     @RequestMapping(value = "getByPage",method = RequestMethod.GET)
     @ApiOperation(value = "分页获取用户",notes = "分页获取用户")
     public String getByPage(
@@ -62,11 +49,7 @@ public class UserController {
         }
         long total = userDao.count(keyWord);//获取查询总数
         long totalPage = total%pageSize==0? total/pageSize:total/pageSize+1;//总页数
-        try {
-            result = TableUtil.createTableDate(list,total,pageNum,totalPage,pageSize);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        result = TableUtil.createTableDate(list,total,pageNum,totalPage,pageSize);
         return result;
     }
 
@@ -81,11 +64,7 @@ public class UserController {
             list.add(user);
         }
         total = list.size();
-        try {
-            result = TableUtil.createTableDate(list,total,0,0,0);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        result = TableUtil.createTableDate(list,total,0,0,0);
         return result;
     }
 
@@ -96,15 +75,29 @@ public class UserController {
             @RequestParam("userCode")String userCode){
         String result = "";
         User user = userDao.getUserByUserCode(userCode);
-        try {
-            result = JsonUtil.fromObject(user);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        result = JsonUtil.fromObject(user);
         return result;
     }
 
-
+    @RequestMapping(value = "/addUser",method = RequestMethod.POST)
+    @ApiOperation(value = "user",notes = "新增用户")
+    public String addUser(@RequestBody User user) {
+                String msg ="";
+        if(user!=null){
+            if(!"".equals(user.getUserCode())&& user.getUserCode()!=null){
+                String password = MD5Util.getMd5(user.getUserCode(),user.getUserPsw());//加密用户密码
+                user.setUserPsw(password);
+                userDao.save(user);
+                msg = "新增用户成功";
+                return  JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,msg);
+            }else {
+                msg = "用户编号不能为空";
+                return  JsonUtil.returnStr(JsonUtil.RESULT_FAIL,msg);
+            }
+        }
+        msg = "新增用户失败";
+        return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,msg);
+    }
     @RequestMapping(value = "/editUser",method = RequestMethod.POST)
     @ApiOperation(value = "user",notes = "修改用户")
     public String editUser(@RequestBody User user)  {
@@ -112,12 +105,7 @@ public class UserController {
         if(user!=null){
             User oldUser = userDao.getUserByUserCode(user.getUserCode());//修改的用户是否存在
             if(oldUser!=null){
-                String pasword = null;
-                try {
-                    pasword = MD5Util.getMd5(user.getUserCode(),user.getUserPsw());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                String pasword = MD5Util.getMd5(user.getUserCode(),user.getUserPsw());
                 user.setUserPsw(pasword);
                 userDao.save(user);
                 msg = "修改用户成功";
