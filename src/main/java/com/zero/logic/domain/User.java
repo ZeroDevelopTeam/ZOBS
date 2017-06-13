@@ -44,7 +44,7 @@ public class User extends BasicBean{
     private String email;
 
     @ManyToMany
-    @JoinTable(name="sys_role_purview",
+    @JoinTable(name="sys_user_role",
             inverseJoinColumns=@JoinColumn(name="roleId",referencedColumnName="roleId"),
             joinColumns=@JoinColumn(name="userCode",referencedColumnName="userCode"))
    private Set<Role> roles = new HashSet<>();

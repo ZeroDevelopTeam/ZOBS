@@ -17,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -73,7 +74,7 @@ public class UserController {
     @ApiOperation(value = "获取用户",notes = "根据用户编号获取所有用户")
     public String getUserByUserCode(
             @ApiParam(required=true,name="userCode", value="用户编号")
-            @RequestParam("userCode")String userCode){
+            @RequestParam("userCode")String userCode) throws Exception {
         String result = "";
         User user = userDao.getUserByUserCode(userCode);
         result = JsonUtil.fromObject(user);
@@ -100,11 +101,22 @@ public class UserController {
 
     @RequestMapping(value = "/editUser",method = RequestMethod.POST)
     @ApiOperation(value = "user",notes = "修改用户")
-    public String editUser(@RequestBody User user){
+    public String editUser(@RequestBody User user,@RequestParam String [] roles){
                 String msg = "";
         if(user!=null){
             User oldUser = userDao.getUserByUserCode(user.getUserCode());//修改的用户是否存在
             if(oldUser!=null){
+                //用户拥有的角色
+                Set<Role> oldRoles = oldUser.getRoles();
+                //删除用户拥有的旧的角色
+                oldUser.getRoles().removeAll(oldRoles);
+                //保存修改用户时添加的角色
+                for (String roleId:roles){
+                    Role role = roleDao.getRoleByRoleId(roleId);
+                    if (null!=role && role.getState()!=0){
+                        user.getRoles().add(role);
+                    }
+                }
                 String pasword = MD5Util.getMd5(user.getUserCode(),user.getUserPsw());
                 user.setUserPsw(pasword);
                 userDao.save(user);
@@ -126,6 +138,11 @@ public class UserController {
                 User user = userDao.getUserByUserCode(userCode);
                 if(user!=null){
                     userDao.delete(user);
+                    //删除用户角色中间表
+                    Set<Role> roles = user.getRoles();
+                    for (Role role:roles){
+                        user.getRoles().remove(role);
+                    }
                     msg = "删除用户成功";
                     return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,msg);
                 }

@@ -2,11 +2,20 @@ package com.zero.logic.controller;
 
 import com.zero.logic.dao.PurviewDao;
 import com.zero.logic.domain.Purview;
+import com.zero.logic.domain.Role;
 import com.zero.logic.util.JsonUtil;
+import com.zero.logic.util.TableUtil;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -87,5 +96,31 @@ public class PurviewController {
         }catch (Exception e){
             return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"删除权限失败");
         }
+    }
+
+    @RequestMapping(value = "getByPage",method = RequestMethod.GET)
+    @ApiOperation(value = "分页获取权限",notes = "分页获取所有权限信息")
+    public String getByPage(
+            @RequestParam("keyWord")String keyWord,
+            @RequestParam(value = "pageNum", defaultValue = "0") Integer pageNum,
+            @RequestParam(value = "pageSize", defaultValue = "15") Integer pageSize){
+        String msg="";
+        String result="";
+        Sort sort = new Sort(Sort.Direction.DESC, "purviewId");
+        Pageable pageable = new PageRequest(pageNum-1,pageSize,sort);
+        Page<Purview> purviews = purviewDao.findByPurviewName(keyWord,pageable);
+        long total = purviewDao.count(keyWord);
+        List<Object> list = new ArrayList<>();
+
+        for (Purview purview:purviews){
+            list.add(purview);
+        }
+        long totalPage = total%pageSize==0? total/pageSize:total/pageSize+1;//总页数
+        try {
+            result = TableUtil.createTableDate(list,total,pageNum,totalPage,pageSize);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 }
