@@ -36,7 +36,7 @@ public interface PurviewDao extends CrudRepository<Purview,Integer> {
      * @param keyWord
      * @return
      */
-    @Query("select t from Purview t where t.purviewName like %?1% or t.purviewId like %?1% or t.purviewDesc like %?1%")
+    @Query("select count(*)from Purview t where t.purviewName like %?1% or t.purviewId like %?1% or t.purviewDesc like %?1%")
     public long count(@Param("keyWord")String keyWord);
 
 }

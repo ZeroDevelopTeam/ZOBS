@@ -3,21 +3,24 @@ import com.zero.logic.dao.RoleDao;
 import com.zero.logic.dao.UserDao;
 import com.zero.logic.domain.Role;
 import com.zero.logic.domain.User;
+import com.zero.logic.util.DateUtil;
 import com.zero.logic.util.JsonUtil;
 import com.zero.logic.util.MD5Util;
 import com.zero.logic.util.TableUtil;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import net.sf.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
+
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.Set;
+
 
 
 /**
@@ -91,6 +94,9 @@ public class UserController {
                             user.getRoles().add(role);
                         }
                     }
+                    Date date = new Date();//系统当前时间
+                    user.setCreateDate(date);
+                    user.setUpdateDate(date);
                     userDao.save(user);
                     return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS, "新增用户信息成功");
                 }catch (Exception e){
@@ -101,24 +107,23 @@ public class UserController {
 
     @RequestMapping(value = "/editUser",method = RequestMethod.POST)
     @ApiOperation(value = "user",notes = "修改用户")
-    public String editUser(@RequestBody User user,@RequestParam String [] roles){
+    public String editUser(@RequestBody User user,@RequestParam String [] roleIds) throws ParseException {
                 String msg = "";
         if(user!=null){
-            User oldUser = userDao.getUserByUserCode(user.getUserCode());//修改的用户是否存在
-            if(oldUser!=null){
-                //用户拥有的角色
-                Set<Role> oldRoles = oldUser.getRoles();
-                //删除用户拥有的旧的角色
-                oldUser.getRoles().removeAll(oldRoles);
-                //保存修改用户时添加的角色
-                for (String roleId:roles){
+            User oldUser = userDao.getUserByUserCode(user.getUserCode());
+            if(null!=oldUser){
+                //保存用户角色
+                for (int i=0;i<roleIds.length;i++){
+                    String roleId = roleIds[i];
                     Role role = roleDao.getRoleByRoleId(roleId);
-                    if (null!=role && role.getState()!=0){
+                    if(null!=role && role.getState()!=0){
                         user.getRoles().add(role);
                     }
                 }
                 String pasword = MD5Util.getMd5(user.getUserCode(),user.getUserPsw());
                 user.setUserPsw(pasword);
+                user.setUpdateDate(new Date());//修改时间
+                user.setCreateDate(DateUtil.parse(DateUtil.FORMAT2,oldUser.getCreateDate()));
                 userDao.save(user);
                 msg = "修改用户成功";
                 return  JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,msg);
@@ -136,13 +141,8 @@ public class UserController {
         try {
             if(!"".equals(userCode)){
                 User user = userDao.getUserByUserCode(userCode);
-                if(user!=null){
+                if(null!=user&&user.getState()!=0){//用户状态为停用时才能删除
                     userDao.delete(user);
-                    //删除用户角色中间表
-                    Set<Role> roles = user.getRoles();
-                    for (Role role:roles){
-                        user.getRoles().remove(role);
-                    }
                     msg = "删除用户成功";
                     return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,msg);
                 }
@@ -166,7 +166,10 @@ public class UserController {
                 String []userCodes = str_userCode.split(",");
                 for(String userCode:userCodes){
                     try {
-                        userDao.deleteByUserCode(userCode);
+                        User oldUser = userDao.getUserByUserCode(userCode);
+                        if(oldUser.getState()!=0){//只能删除状态为停用的用户
+                            userDao.deleteByUserCode(userCode);
+                        }
                     }catch (Exception e){
                         e.printStackTrace();
                         msg = "删除用户"+userCode+"失败";
@@ -187,6 +190,8 @@ public class UserController {
                     try {
                         User user = userDao.getUserByUserCode(userCode);
                         user.setState(state);
+                        user.setUpdateDate(new Date());
+                        user.setCreateDate(DateUtil.parse(DateUtil.FORMAT2,user.getCreateDate()));
                         userDao.save(user);
                     }catch (Exception e){
                         e.printStackTrace();

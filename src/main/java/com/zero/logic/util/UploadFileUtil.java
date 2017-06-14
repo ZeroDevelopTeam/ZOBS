@@ -35,12 +35,12 @@ public class UploadFileUtil {
         }
         try {
             //获取已存在的文件名
-            List<String> list = getExistsFile(UploadFileConfigUtil.uploadFilePath);
-            for (String oldFileName:list){
-                if(oldFileName.equals(file.getOriginalFilename())){
-                    System.out.print("上传的文件："+file.getOriginalFilename()+"已经存在目录"+UploadFileConfigUtil.uploadFilePath);
-                }
-            }
+           // List<String> list = getExistsFile(UploadFileConfigUtil.uploadFilePath);
+            //for (String oldFileName:list){
+                //if(oldFileName.equals(file.getOriginalFilename())){
+                   // System.out.print("上传的文件："+file.getOriginalFilename()+"已经存在目录"+UploadFileConfigUtil.uploadFilePath);
+               // }
+            //}
             //获取文件、保存文件
             byte[] bytes = file.getBytes();
             BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(new File(UploadFileConfigUtil.uploadFilePath+"/"+file.getOriginalFilename())));

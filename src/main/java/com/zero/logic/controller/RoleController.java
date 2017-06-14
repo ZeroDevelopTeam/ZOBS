@@ -4,6 +4,8 @@ import com.zero.logic.dao.PurviewDao;
 import com.zero.logic.dao.RoleDao;
 import com.zero.logic.domain.Purview;
 import com.zero.logic.domain.Role;
+import com.zero.logic.domain.User;
+import com.zero.logic.util.DateUtil;
 import com.zero.logic.util.JsonUtil;
 import com.zero.logic.util.TableUtil;
 import io.swagger.annotations.ApiOperation;
@@ -16,7 +18,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 角色控制类
@@ -40,6 +44,9 @@ public class RoleController {
                 if(null!=purview&&purview.getState()!=0)
                     role.getPurviews().add(purview);
             }
+            Date date = new Date();//系统当前时间
+            role.setCreateDate(date);//新增时间
+            role.setUpdateDate(date);//修改时间
             roleDao.save(role);
             return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS, "新增角色信息成功");
         } catch (Exception e) {
@@ -53,11 +60,14 @@ public class RoleController {
         try {
             Role oldRole = roleDao.getRoleByRoleId(role.getRoleId());
             if (null != oldRole) {
+                //保存权限
                 for (String purviewId : purviews) {
                     Purview purview = purviewDao.getPurviewByPurviewId(purviewId);
                     if(null!=purview&&purview.getState()!=0)
                         role.getPurviews().add(purview);
                 }
+                role.setUpdateDate(new Date());
+                role.setCreateDate(DateUtil.parse(DateUtil.FORMAT2,oldRole.getCreateDate()));
                 roleDao.save(role);
                 return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS, "修改角色成功");
             }else {
@@ -74,7 +84,7 @@ public class RoleController {
     public String removeRole(@PathVariable String roleId){
         try {
             Role role = roleDao.getRoleByRoleId(roleId);
-            if(null!=role&&role.getState()==0) {
+            if(null!=role&&role.getState()==0) {//角色状态为停用才能删除
                 roleDao.delete(role);
                 return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS, "删除角色成功");
             }else{
@@ -119,17 +129,6 @@ public class RoleController {
         }
     }
 
-    @RequestMapping(value = "/getAllRole",method = RequestMethod.GET)
-    @ApiOperation(value = "获取所有角色",notes = "获取所有角色信息")
-    public String getRoleList(){
-        try {
-            Iterable<Role>  roles = roleDao.findAll();
-            return JsonUtil.fromArray(roles);
-        }catch (Exception e){
-            return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"获取全部角色失败");
-        }
-    }
-
     @RequestMapping(value = "getByPage",method = RequestMethod.GET)
     @ApiOperation(value = "分页获取所有角色",notes = "分页获取所有角色信息")
     public String getByPage(
@@ -155,4 +154,27 @@ public class RoleController {
         return result;
     }
 
+
+    @RequestMapping(value = "/changeUserState",method = RequestMethod.GET)
+    @ApiOperation(value = "String roleIds[]",notes = "修改单个或多个角色状态")
+    public String changeUserState(
+            @RequestParam("roleIds") String [] roleIds,
+            @RequestParam("state")int state){
+        String msg="";
+        for (String roleId:roleIds){
+            try {
+               Role role = roleDao.getRoleByRoleId(roleId);
+                role.setState(state);
+                role.setUpdateDate(new Date());//修改时间
+                role.setCreateDate(DateUtil.parse(DateUtil.FORMAT2,role.getCreateDate()));
+                roleDao.save(role);
+            }catch (Exception e){
+                e.printStackTrace();
+                msg = "角色："+roleId+"状态修改失败";
+                return  JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,msg);
+            }
+        }
+        msg = "角色状态修改成功";
+        return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,msg);
+    }
 }
