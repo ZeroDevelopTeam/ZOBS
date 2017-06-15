@@ -2,7 +2,6 @@ package com.zero.logic.controller;
 
 import com.zero.logic.dao.PurviewDao;
 import com.zero.logic.domain.Purview;
-import com.zero.logic.domain.Role;
 import com.zero.logic.util.DateUtil;
 import com.zero.logic.util.JsonUtil;
 import com.zero.logic.util.TableUtil;
@@ -35,9 +34,8 @@ public class PurviewController {
     @ApiOperation(value = "新增权限",notes = "新增用户的权限")
     public String addPurview(@RequestBody Purview purview) {
         try {
-            Date date = new Date();//系统当前时间
-            purview.setCreateDate(date);
-            purview.setUpdateDate(date);
+            purview.setCreateDate(new Date());
+            purview.setUpdateDate(new Date());
             purviewDao.save(purview);
             return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"新增权限成功" );
         } catch (Exception e) {
@@ -51,12 +49,11 @@ public class PurviewController {
         try {
             Purview oldPurview = purviewDao.getPurviewByPurviewId(purview.getPurviewId());
             if (null!=oldPurview) {
-                purview.setUpdateDate(new Date());//修改时间
-                purview.setCreateDate(DateUtil.parse(DateUtil.FORMAT2,oldPurview.getCreateDate()));//权限创建时间
+                purview.setUpdateDate(new Date());
+                purview.setCreateDate(DateUtil.parse(DateUtil.FORMAT2,oldPurview.getCreateDate()));
                 purviewDao.save(purview);
                 return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS, "修改权限成功");
             } else {
-
                 return JsonUtil.returnStr(JsonUtil.RESULT_FAIL, "修改权限失败");
             }
         } catch (Exception e) {
@@ -111,24 +108,20 @@ public class PurviewController {
             @RequestParam("keyWord")String keyWord,
             @RequestParam(value = "pageNum", defaultValue = "0") Integer pageNum,
             @RequestParam(value = "pageSize", defaultValue = "15") Integer pageSize){
-        String msg="";
-        String result="";
-        Sort sort = new Sort(Sort.Direction.DESC, "purviewId");
-        Pageable pageable = new PageRequest(pageNum-1,pageSize,sort);
-        Page<Purview> purviews = purviewDao.findByPurviewName(keyWord,pageable);
-        long total = purviewDao.count(keyWord);
-        List<Object> list = new ArrayList<>();
-
-        for (Purview purview:purviews){
-            list.add(purview);
-        }
-        long totalPage = total%pageSize==0? total/pageSize:total/pageSize+1;//总页数
         try {
-            result = TableUtil.createTableDate(list,total,pageNum,totalPage,pageSize);
+            Sort sort = new Sort(Sort.Direction.DESC, "purviewId");
+            Pageable pageable = new PageRequest(pageNum-1,pageSize,sort);
+            Page<Purview> purviews = purviewDao.findByPurviewName(keyWord,pageable);
+            long total = purviewDao.count(keyWord);
+            List<Object> list = new ArrayList<>();
+            for (Purview purview:purviews){
+                list.add(purview);
+            }
+            long totalPage = total%pageSize==0? total/pageSize:total/pageSize+1;//总页数
+            return TableUtil.createTableDate(list,total,pageNum,totalPage,pageSize);
         } catch (Exception e) {
-            e.printStackTrace();
+            return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"获取权限失败");
         }
-        return result;
     }
 
     @RequestMapping(value = "/changeUserState",method = RequestMethod.GET)
@@ -136,21 +129,17 @@ public class PurviewController {
     public String changeUserState(
             @RequestParam("purviewIds") String [] purviewIds,
             @RequestParam("state")int state){
-        String msg="";
-        for (String purviewId:purviewIds){
             try {
-                Purview purview = purviewDao.getPurviewByPurviewId(purviewId);
-                purview.setState(state);
-                purview.setUpdateDate(new Date());//修改时间
-                purview.setCreateDate(DateUtil.parse(DateUtil.FORMAT2,purview.getCreateDate()));
-                purviewDao.save(purview);
+                for (String purviewId:purviewIds) {
+                    Purview purview = purviewDao.getPurviewByPurviewId(purviewId);
+                    purview.setState(state);
+                    purview.setUpdateDate(new Date());//修改时间
+                    purview.setCreateDate(DateUtil.parse(DateUtil.FORMAT2, purview.getCreateDate()));
+                    purviewDao.save(purview);
+                }
+                return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"修改权限成功");
             }catch (Exception e){
-                e.printStackTrace();
-                msg = "权限："+purviewId+"状态修改失败";
-                return  JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,msg);
+                return  JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"修改权限失败");
             }
-        }
-        msg = "权限状态修改成功";
-        return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,msg);
     }
 }
