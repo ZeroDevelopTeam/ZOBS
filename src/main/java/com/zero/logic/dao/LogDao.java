@@ -31,10 +31,4 @@ public interface LogDao extends CrudRepository<Log,Integer>{
     @Query("select count(*) from Log t where t.type=?2 and (t.logId like %?1% or t.logContent like %?1% or t.userCode like %?1%)" )
     public long count(@Param("keyWord")String keyWord,@Param("type") int type);
 
-    /**
-     * 保存日志
-     * @param log
-     * @return
-     */
-    //public Log saveLog(Log log);
 }
