@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
+import java.util.List;
 
 
 /**
@@ -39,4 +40,12 @@ public interface BookDao extends CrudRepository<Book,Integer> {
      * @return
      */
     public Book getBookByBookId(String bookId);
+
+    /**
+     * 根据图书分类编号获取图书
+     * @param typeId
+     * @return
+     */
+    @Query("select t from Book t where t.typeId=:typeId")
+    public List<Book> getBookByTypeId(@Param("typeId") String typeId);
 }

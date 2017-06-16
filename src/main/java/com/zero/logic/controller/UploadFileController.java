@@ -1,7 +1,4 @@
-package com.zero.logic.controller;/**
- * Created by Admin on 2017/6/12.
- */
-
+package com.zero.logic.controller;
 import com.zero.logic.util.JsonUtil;
 import com.zero.logic.util.UploadFileUtil;
 import io.swagger.annotations.ApiOperation;

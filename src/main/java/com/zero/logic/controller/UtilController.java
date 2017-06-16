@@ -1,6 +1,4 @@
-package com.zero.logic.controller;/**
- * Created by Admin on 2017/6/15.
- */
+package com.zero.logic.controller;
 
 import com.zero.logic.util.DownloadUtil;
 import com.zero.logic.util.JsonUtil;

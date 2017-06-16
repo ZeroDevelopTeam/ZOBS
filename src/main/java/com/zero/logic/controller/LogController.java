@@ -1,7 +1,5 @@
-package com.zero.logic.controller;/**
- * Created by Admin on 2017/6/9.
- */
-
+package com.zero.logic.controller;
+import org.springframework.web.bind.annotation.RestController;
 import com.zero.logic.dao.LogDao;
 import com.zero.logic.domain.Log;
 import com.zero.logic.util.JsonUtil;

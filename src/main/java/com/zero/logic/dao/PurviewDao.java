@@ -1,7 +1,6 @@
 package com.zero.logic.dao;
 
 import com.zero.logic.domain.Purview;
-import com.zero.logic.domain.Role;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -29,7 +28,6 @@ public interface PurviewDao extends CrudRepository<Purview,Integer> {
      */
     @Query("select t from Purview t where t.purviewName like %?1% or t.purviewId like %?1% or t.purviewDesc like %?1%")
     public Page<Purview> findByPurviewName(@Param("keyWord") String keyWord, Pageable pageable);
-
 
     /**
      * 获取模糊查询记录数

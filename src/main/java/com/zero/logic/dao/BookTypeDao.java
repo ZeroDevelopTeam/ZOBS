@@ -1,7 +1,4 @@
-package com.zero.logic.dao;/**
- * Created by Admin on 2017/6/15.
- */
-
+package com.zero.logic.dao;
 import com.zero.logic.domain.BookType;
 import org.springframework.data.repository.CrudRepository;
 

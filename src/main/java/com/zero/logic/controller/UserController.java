@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import java.text.ParseException;
 import java.util.*;
 
-
 /**
  * 用户控制类
  *
@@ -29,7 +28,6 @@ import java.util.*;
 @RestController
 @RequestMapping("/user")
 public class UserController {
-
 
     @Autowired
     private UserDao userDao;
@@ -178,15 +176,20 @@ public class UserController {
         }
     }
 
-    @RequestMapping(value = "/changeUserPsw",method = RequestMethod.POST)
+    @RequestMapping(value = "/changeUserPsw",method = RequestMethod.GET)
     @ApiOperation(value = "修改用户密码",notes = "修改用户密码")
-    public String changeUserPsw(@RequestBody User user){
+    public String changeUserPsw(@RequestParam String userCode,@RequestParam String userPsw,@RequestParam String oldUserPsw){
         try {
-            User oldUser = userDao.getUserByUserCode(user.getUserCode());
-            oldUser.setUserPsw(MD5Util.getMd5(user.getUserCode(),user.getUserPsw()));
-            oldUser.setUpdateDate(new Date());
-            userDao.save(oldUser);
-            return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"密码修改成功");
+            User oldUser = userDao.getUserByUserCode(userCode);
+            oldUserPsw = MD5Util.getMd5(userCode,oldUserPsw);//校验用户旧密码
+            if (oldUserPsw.equals(oldUser.getUserPsw())){
+                oldUser.setUserPsw(MD5Util.getMd5(userCode,userPsw));//设置新密码
+                oldUser.setUpdateDate(new Date());
+                userDao.save(oldUser);
+                return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"密码修改成功");
+            }else {
+                return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"旧密码不正确");
+            }
         }catch (Exception e){
             return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"密码修改失败");
         }
