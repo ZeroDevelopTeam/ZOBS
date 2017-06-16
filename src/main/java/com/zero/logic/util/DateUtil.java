@@ -38,6 +38,9 @@ public class DateUtil {
      * @throws ParseException
      */
     public static String formatDate(DateFormat format,Date date)throws ParseException{
+        if (date==null){
+            date = new Date();
+        }
         return format.format(date);
     }
 }

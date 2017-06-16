@@ -19,7 +19,7 @@ public class TableUtil {
      */
     public static String createTableDate(Object obj,long total,int currentPage,long totalPage,long pageSize){
         JSONObject json = new JSONObject();
-        json.put("currentPage", currentPage);
+        json.put("pageNum", currentPage);
         json.put("totalPage", totalPage);
         json.put("pageSize",pageSize);
         json.put("total", total);

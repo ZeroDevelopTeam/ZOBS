@@ -20,7 +20,7 @@ public interface LogDao extends CrudRepository<Log,Integer>{
      * @param pageable
      * @return
      */
-    @Query("select t from Log t where t.typ=?2 and (t.logId like %?1% or t.logContent like %?1% or t.userCode like %?1%)" )
+    @Query("select t from Log t where t.type=?2 and (t.logId like %?1% or t.logContent like %?1% or t.userCode like %?1%)" )
     public Page<Log> getByPage(String keyWord,int type, Pageable pageable);
 
     /**
@@ -28,7 +28,7 @@ public interface LogDao extends CrudRepository<Log,Integer>{
      * @param keyWord
      * @return
      */
-    @Query("select count(*) from Log t where t.typ=?2 and (t.logId like %?1% or t.logContent like %?1% or t.userCode like %?1%)" )
+    @Query("select count(*) from Log t where t.type=?2 and (t.logId like %?1% or t.logContent like %?1% or t.userCode like %?1%)" )
     public long count(@Param("keyWord")String keyWord,@Param("type") int type);
 
     /**

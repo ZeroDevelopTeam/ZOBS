@@ -44,14 +44,4 @@ public interface UserDao extends CrudRepository<User,Integer> {
     @Query("select count(*) from User t where t.userName like %?1% or t.userCode like %?1% or t.address like %?1% or t.phone like %?1%" )
     public long count(@Param("keyWord")String keyWord);
 
-
-    /**
-     * 根据用户编号删除用户
-     * @param userCode
-     */
-    @Modifying
-    @Transactional
-    @Query("delete  from User t where t.userCode =:userCode")
-    public void deleteByUserCode(@Param("userCode") String userCode);
-
 }

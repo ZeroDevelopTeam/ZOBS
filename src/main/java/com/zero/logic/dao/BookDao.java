@@ -30,7 +30,7 @@ public interface BookDao extends CrudRepository<Book,Integer> {
      * @param keyWord
      * @return
      */
-    @Query("select t from Book t where t.bookName like %?1% or t.bookId like %?1% or t.author like %?1% or t.bookDesc like %?1% ")
+    @Query("select count (*)from Book t where t.bookName like %?1% or t.bookId like %?1% or t.author like %?1% or t.bookDesc like %?1% ")
     public long count(@Param("keyWord")String keyWord);
 
     /**

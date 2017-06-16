@@ -3,11 +3,13 @@ package com.zero.logic.domain;/**
  */
 
 import com.zero.basic.domain.BasicBean;
+import com.zero.logic.util.DateUtil;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.text.ParseException;
 import java.util.Date;
 
 /**
@@ -136,8 +138,8 @@ public class Book extends BasicBean{
         this.press = press;
     }
 
-    public Date getPublishTime() {
-        return publishTime;
+    public String getPublishTime() throws ParseException {
+        return DateUtil.formatDate(DateUtil.FORMAT2,publishTime);
     }
 
     public void setPublishTime(Date publishTime) {
@@ -168,8 +170,8 @@ public class Book extends BasicBean{
         WordNum = wordNum;
     }
 
-    public Date getPrinttime() {
-        return printtime;
+    public String getPrinttime() throws ParseException {
+        return DateUtil.formatDate(DateUtil.FORMAT2,printtime);
     }
 
     public void setPrinttime(Date printtime) {

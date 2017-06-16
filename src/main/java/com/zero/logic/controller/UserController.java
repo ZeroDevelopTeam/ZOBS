@@ -17,10 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
+import java.util.*;
 
 
 /**
@@ -44,33 +41,22 @@ public class UserController {
             @RequestParam("keyWord")String keyWord,
             @RequestParam(value = "pageNum", defaultValue = "0") Integer pageNum,
             @RequestParam(value = "pageSize", defaultValue = "15") Integer pageSize){
-        String result = null;
-        Sort sort = new Sort(Sort.Direction.DESC, "userCode");
-        Pageable pageable = new PageRequest(pageNum-1 , pageSize, sort);
-        Page<User> users = userDao.findByUserName(keyWord,pageable);
-        List<Object> list = new ArrayList<>();
-        for(User user:users){
-            list.add(user);
+        try {
+            Sort sort = new Sort(Sort.Direction.DESC, "userCode");
+            Pageable pageable = new PageRequest(pageNum-1 , pageSize, sort);
+            Page<User> users = userDao.findByUserName(keyWord,pageable);
+            List<Object> list = new ArrayList<>();
+            for(User user:users){
+                list.add(user);
+            }
+            long total = userDao.count(keyWord);//获取查询总数
+            long totalPage = total%pageSize==0? total/pageSize:total/pageSize+1;//总页数
+            return TableUtil.createTableDate(list,total,pageNum,totalPage,pageSize);
+        }catch (Exception e){
+            e.printStackTrace();
+            return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"获取用户失败");
         }
-        long total = userDao.count(keyWord);//获取查询总数
-        long totalPage = total%pageSize==0? total/pageSize:total/pageSize+1;//总页数
-        result = TableUtil.createTableDate(list,total,pageNum,totalPage,pageSize);
-        return result;
-    }
 
-    @RequestMapping(value = "/getAllUser",method = RequestMethod.GET)
-    @ApiOperation(value = "获取所有用户",notes = "获取所有用户")
-    public String getAllUser(){
-        String result = "";
-        long total=0;
-        List<Object> list = new ArrayList<>();
-       Iterable<User> users = userDao.findAll();
-        for (User user : users){
-            list.add(user);
-        }
-        total = list.size();
-        result = TableUtil.createTableDate(list,total,0,0,0);
-        return result;
     }
 
     @RequestMapping(value = "/getUserByUserCode",method = RequestMethod.GET)
@@ -78,14 +64,18 @@ public class UserController {
     public String getUserByUserCode(
             @ApiParam(required=true,name="userCode", value="用户编号")
             @RequestParam("userCode")String userCode) throws Exception {
-        String result = "";
-        User user = userDao.getUserByUserCode(userCode);
-        result = JsonUtil.fromObject(user);
-        return result;
+        try {
+            User user = userDao.getUserByUserCode(userCode);
+            return JsonUtil.fromObject(user);
+        }catch (Exception e){
+            e.printStackTrace();
+            return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"获取用户失败");
+        }
+
     }
 
     @RequestMapping(value = "/addUser",method = RequestMethod.POST)
-    @ApiOperation(value = "user",notes = "新增用户")
+    @ApiOperation(value = "新增用户",notes = "新增用户信息")
     public String addUser(@RequestBody User user,@RequestParam String [] roles){
                 try {
                     for (String roleId:roles){
@@ -94,22 +84,21 @@ public class UserController {
                             user.getRoles().add(role);
                         }
                     }
-                    Date date = new Date();//系统当前时间
-                    user.setCreateDate(date);
-                    user.setUpdateDate(date);
+                    user.setUserPsw(MD5Util.getMd5(user.getUserCode(),user.getUserPsw()));
+                    user.setCreateDate(new Date());
+                    user.setUpdateDate(new Date());
                     userDao.save(user);
                     return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS, "新增用户信息成功");
                 }catch (Exception e){
                     e.printStackTrace();
-                    return JsonUtil.returnStr(JsonUtil.RESULT_FAIL, "新增用户信息成功");
+                    return JsonUtil.returnStr(JsonUtil.RESULT_FAIL, "新增用户信息失败");
                 }
     }
 
     @RequestMapping(value = "/editUser",method = RequestMethod.POST)
-    @ApiOperation(value = "user",notes = "修改用户")
+    @ApiOperation(value = "修改用户",notes = "根据用户编号修改用户")
     public String editUser(@RequestBody User user,@RequestParam String [] roleIds) throws ParseException {
-                String msg = "";
-        if(user!=null){
+        try {
             User oldUser = userDao.getUserByUserCode(user.getUserCode());
             if(null!=oldUser){
                 //保存用户角色
@@ -120,86 +109,115 @@ public class UserController {
                         user.getRoles().add(role);
                     }
                 }
-                String pasword = MD5Util.getMd5(user.getUserCode(),user.getUserPsw());
-                user.setUserPsw(pasword);
+                user.setUserPsw(MD5Util.getMd5(user.getUserCode(),user.getUserPsw()));
                 user.setUpdateDate(new Date());//修改时间
                 user.setCreateDate(DateUtil.parse(DateUtil.FORMAT2,oldUser.getCreateDate()));
                 userDao.save(user);
-                msg = "修改用户成功";
-                return  JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,msg);
-            }
-        }
-        msg = "修改用户失败";
-        return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,msg);
-    }
-    @RequestMapping(value = "/deleteUser",method = RequestMethod.GET)
-    @ApiOperation(value = "userode",notes = "根据用户编号删除用户")
-    public String deleteUser(
-            @ApiParam(required=true,name="userCode", value="用户编号")
-            @RequestParam("userCode")String userCode){
-        String msg = "";
-        try {
-            if(!"".equals(userCode)){
-                User user = userDao.getUserByUserCode(userCode);
-                if(null!=user&&user.getState()!=0){//用户状态为停用时才能删除
-                    userDao.delete(user);
-                    msg = "删除用户成功";
-                    return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,msg);
-                }
+                return  JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"用户修改成功");
             }else {
-                msg = "请输入要删除的用户编码";
-                return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,msg);
+                return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"用户修改失败");
             }
         }catch (Exception e){
             e.printStackTrace();
-            msg = "删除用户失败";
-            return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,msg);
+            return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"用户修改失败");
         }
-        msg = "删除用户失败";
-        return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,msg);
     }
-    @RequestMapping(value = "/deleteUsers",method = RequestMethod.GET)
-    @ApiOperation(value = "str_userCode",notes = "根据用户编号批量删除用户")
-    public String deleteUsers(String str_userCode) {
-                String msg = "";
 
-                String []userCodes = str_userCode.split(",");
-                for(String userCode:userCodes){
-                    try {
-                        User oldUser = userDao.getUserByUserCode(userCode);
-                        if(oldUser.getState()!=0){//只能删除状态为停用的用户
-                            userDao.deleteByUserCode(userCode);
-                        }
-                    }catch (Exception e){
-                        e.printStackTrace();
-                        msg = "删除用户"+userCode+"失败";
-                        return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,msg);
-                    }
+    @RequestMapping(value = "/deleteUsers",method = RequestMethod.DELETE)
+    @ApiOperation(value = "删除用户",notes = "根据用户编号删除用户")
+    public String deleteUsers(@RequestParam String []userCodes) {
+        try {
+            String unDeleteId="";
+            for (int i=0;i<userCodes.length;i++){
+                String userCode = userCodes[i];
+                User oldUser = userDao.getUserByUserCode(userCode);
+                if (oldUser.getState()!=0){//只能删除停用的用户
+                    userDao.delete(oldUser);
+                }else {
+                    unDeleteId +=userCode;
                 }
-                msg = "批量删除用户成功";
-                return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,msg);
+            }
+            if ("".equals(unDeleteId)){
+                return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"删除用户成功");
+            }else {
+                return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"除了" + unDeleteId + "用户未停用，其余用户删除成功");
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"删除用户失败");
+        }
     }
 
     @RequestMapping(value = "/changeUserState",method = RequestMethod.GET)
-    @ApiOperation(value = "String userCodes[]",notes = "修改单个或多个用户账号状态")
+    @ApiOperation(value = "修改用户状态",notes = "修改单个或多个用户账号状态")
     public String changeUserState(
             @RequestParam("userCodes") String [] userCodes,
             @RequestParam("state")int state){
-                String msg="";
-                for (String userCode:userCodes){
-                    try {
-                        User user = userDao.getUserByUserCode(userCode);
-                        user.setState(state);
-                        user.setUpdateDate(new Date());
-                        user.setCreateDate(DateUtil.parse(DateUtil.FORMAT2,user.getCreateDate()));
-                        userDao.save(user);
-                    }catch (Exception e){
-                        e.printStackTrace();
-                        msg = "用户："+userCode+"状态修改失败";
-                        return  JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,msg);
-                    }
+        try {
+            String unUserState="";
+            for (int i=0;i<userCodes.length;i++){
+                String userCode = userCodes[i];
+                User oldUser = userDao.getUserByUserCode(userCode);
+                if (null!=oldUser){
+                    oldUser.setState(state);
+                    oldUser.setUpdateDate(new Date());
+                    oldUser.setCreateDate(DateUtil.parse(DateUtil.FORMAT2,oldUser.getCreateDate()));
+                    userDao.save(oldUser);
+                }else {
+                    unUserState +=userCode+"";
                 }
-                msg = "用户状态修改成功";
-                return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,msg);
+            }
+            if ("".equals(unUserState)){
+                return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"用户状态修改成功");
+            }else {
+                return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"除了"+unUserState+"用户状态修改失败，其余修改成功");
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"用户状态修改失败");
+        }
     }
+
+    @RequestMapping(value = "/changeUserPsw",method = RequestMethod.POST)
+    @ApiOperation(value = "修改用户密码",notes = "修改用户密码")
+    public String changeUserPsw(@RequestBody User user){
+        try {
+            User oldUser = userDao.getUserByUserCode(user.getUserCode());
+            oldUser.setUserPsw(MD5Util.getMd5(user.getUserCode(),user.getUserPsw()));
+            oldUser.setUpdateDate(new Date());
+            userDao.save(oldUser);
+            return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"密码修改成功");
+        }catch (Exception e){
+            return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"密码修改失败");
+        }
+    }
+
+
+    @RequestMapping(value = "login",method = RequestMethod.POST)
+    @ApiOperation(value = "登录系统",notes = "登录系统")
+    public String login(@RequestBody User user){
+        try {
+            Map<String, Object> map = new HashMap<>();
+            User oldUser = userDao.getUserByUserCode(user.getUserCode());
+            if(null!=oldUser&&oldUser.getState()!=0){
+                String userPsw = MD5Util.getMd5(user.getUserCode(),user.getUserPsw());
+                if(oldUser.getUserPsw().equals(userPsw)){
+                    //用户登录成功后返回一个user对象给前端时(不返回密码)
+                    oldUser.setUserPsw("");
+                    map.put("user",JsonUtil.fromObject(oldUser));
+                    String result = JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"登录成功");
+                    return JsonUtil.makeJsonBeanByKey(result,map);
+                }else {
+                    return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"用户或密码不正确");
+                }
+            }else {
+                return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"用户或密码不正确");
+            }
+        }catch(Exception e){
+            return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"登录失败");
+        }
+    }
+
+    //增加一个账号锁定功能和账号解锁功能
+    //增加一个发送验证码到邮箱功能
 }

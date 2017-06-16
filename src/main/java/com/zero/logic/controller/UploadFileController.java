@@ -22,12 +22,17 @@ public class UploadFileController {
 
     @RequestMapping(value = "/uploadFile",method = RequestMethod.POST)
     @ApiOperation(value = "文件上传",notes = "文件上传")
-    public String singleFileUpload(@RequestParam("file")MultipartFile file, RedirectAttributes redirectAttributes) throws JSONException {
-        String msg = UploadFileUtil.singleFileUpload(file);
-        if("文件上传成功".equals(msg)){
-            return JsonUtil.returnStr(200,msg);
-        }else {
-            return JsonUtil.returnStr(500,msg);
+    public String singleFileUpload(@RequestParam("file")MultipartFile file) throws JSONException {
+        try {
+            String msg = UploadFileUtil.singleFileUpload(file);
+            if("文件上传成功".equals(msg)){
+                return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,msg);
+            }else {
+                return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,msg);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"文件上传失败");
         }
     }
 }
