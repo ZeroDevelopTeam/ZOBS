@@ -7,20 +7,18 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * 文件上传工具类
- *
- * @autherAdmin Deram Zhao
- * @creat 2017/6/12
+ * @auther Deram Zhao
+ * @creatT 2017/6/12
  */
 public class UploadFileUtil {
 
     /**
      * 单个文件上传
-     * @param file
-     * @return msg
+     * @param file 文件
+     * @return msg 返回信息
      */
     public static  String singleFileUpload(MultipartFile file){
         if(file.isEmpty()){

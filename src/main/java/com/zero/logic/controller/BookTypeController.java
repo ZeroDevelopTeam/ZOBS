@@ -13,8 +13,8 @@ import java.util.*;
 
 /**
  * 图书分类控制类
- * @autherAdmin Deram Zhao
- * @creat 2017/6/15
+ * @auther Deram Zhao
+ * @creatTime 2017/6/15
  */
 @RestController
 @RequestMapping("bookType")
@@ -24,30 +24,28 @@ public class BookTypeController {
     @Autowired
     private BookDao bookDao;
 
-    @RequestMapping(value = "/addBookType",method = RequestMethod.POST)
-    @ApiOperation(value = "BookType",notes = "新增图书分类")
-    public String addBookType(@RequestBody BookType bookType,@RequestParam int level ){
+    @RequestMapping(value = "/addBookType", method = RequestMethod.POST)
+    @ApiOperation(value = "BookType", notes = "新增图书分类")
+    public String addBookType(@RequestBody BookType bookType, @RequestParam int level) {
         try {
-            if (null!= bookType){
-                //level新增分类等级：-1--第一级，0--下级，1--同级
-                if (level==-1){
-                    bookType.setParent("00");
-                } else if (level==0){
-                    BookType oldBookType = bookTypeDao.getBookTypeByTypeId(bookType.getTypeId());
-                    bookType.setParent(oldBookType.getTypeId());
-                }else if(level==1){
-                    BookType oldBookType = bookTypeDao.getBookTypeByTypeId(bookType.getTypeId());
-                    bookType.setParent(oldBookType.getParent());
-                }
-                bookType.setCreateDate(new Date());
-                bookType.setUpdateDate(new Date());
-                bookTypeDao.save(bookType);
+            //level新增分类等级：-1--第一级，0--下级，1--同级
+            if (level == -1) {
+                bookType.setParent("00");
+            } else if (level == 0) {
+                BookType oldBookType = bookTypeDao.getBookTypeByTypeId(bookType.getTypeId());
+                bookType.setParent(oldBookType.getTypeId());
+            } else if (level == 1) {
+                BookType oldBookType = bookTypeDao.getBookTypeByTypeId(bookType.getTypeId());
+                bookType.setParent(oldBookType.getParent());
             }
-        }catch (Exception e){
+            bookType.setCreateDate(new Date());
+            bookType.setUpdateDate(new Date());
+            bookTypeDao.save(bookType);
+        } catch (Exception e) {
             e.printStackTrace();
-            return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"新增图书分类失败");
+            return JsonUtil.returnStr(JsonUtil.RESULT_FAIL, "新增图书分类失败");
         }
-        return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"新增图书分类成功");
+        return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS, "新增图书分类成功");
     }
 
     @RequestMapping(value = "/editBookType",method = RequestMethod.POST)

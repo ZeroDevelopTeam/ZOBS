@@ -11,25 +11,24 @@ import java.util.List;
 
 /**
  * 图书类接口
- *
- * @autherAdmin Deram Zhao
- * @creat 2017/6/12
+ * @auther Deram Zhao
+ * @creatTime 2017/6/12
  */
 public interface BookDao extends CrudRepository<Book,Integer> {
 
     /**
      * 模糊查询分页获取图书
-     * @param keyWord
-     * @param pageable
-     * @return
+     * @param keyWord 关键字
+     * @param pageable 分页
+     * @return 书籍集合列表
      */
     @Query("select t from Book t where t.bookName like %?1% or t.bookId like %?1% or t.author like %?1% or t.bookDesc like %?1% ")
     Page<Book> findByBookName(@Param("keyWord")String keyWord, Pageable pageable);
 
     /**
      * 模糊查询图书数量
-     * @param keyWord
-     * @return
+     * @param keyWord 关键字
+     * @return 记录数
      */
     @Query("select count (*)from Book t where t.bookName like %?1% or t.bookId like %?1% or t.author like %?1% or t.bookDesc like %?1% ")
     public long count(@Param("keyWord")String keyWord);

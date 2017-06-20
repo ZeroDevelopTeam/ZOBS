@@ -8,12 +8,11 @@ import java.util.Properties;
 
 /**
  * 文件上传配置类
- *
- * @autherAdmin Deram Zhao
- * @creat 2017/6/12
+ * @auther Deram Zhao
+ * @creatT 2017/6/12
  */
 public class UploadFileConfigUtil {
-    public static String uploadFilePath;//文件保存路径
+    public static String uploadFilePath;//文件保存路径ime
     public static String uploadFileSize;//文件大小设置
 
     static {

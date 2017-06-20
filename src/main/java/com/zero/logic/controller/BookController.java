@@ -19,9 +19,8 @@ import java.util.List;
 
 /**
  * 图书控制类
- *
- * @autherAdmin Deram Zhao
- * @creat 2017/6/12
+ * @auther Deram Zhao
+ * @creatTime 2017/6/12
  */
 @RestController
 @RequestMapping("book")

@@ -1,6 +1,4 @@
-package com.zero.logic.domain;/**
- * Created by Admin on 2017/6/12.
- */
+package com.zero.logic.domain;
 
 import com.zero.basic.domain.BasicBean;
 import com.zero.logic.util.DateUtil;
@@ -8,14 +6,13 @@ import com.zero.logic.util.DateUtil;
 import javax.persistence.*;
 import java.text.ParseException;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+
 
 /**
  * 图书类
  *
- * @autherAdmin Deram Zhao
- * @creat 2017/6/12
+ * @auther Deram Zhao
+ * @creatTime 2017/6/12
  */
 @Entity
 @Table(name = "sys_book")

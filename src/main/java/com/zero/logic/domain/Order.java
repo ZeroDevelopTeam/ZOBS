@@ -3,18 +3,14 @@ package com.zero.logic.domain;
 import com.zero.basic.domain.BasicBean;
 import com.zero.logic.util.DateUtil;
 
-import javax.jws.soap.SOAPBinding;
 import javax.persistence.*;
 import java.text.ParseException;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * 订单类
- *
- * @autherAdmin Deram Zhao
- * @creat 2017/6/19
+ * @auther Deram Zhao
+ * @creatTime 2017/6/19
  */
 @Entity
 @Table(name = "sys_order")
