@@ -9,6 +9,7 @@ import com.zero.logic.util.MD5Util;
 import com.zero.logic.util.TableUtil;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
+import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.util.*;
 
@@ -112,7 +114,7 @@ public class UserController {
                 user.setCreateDate(DateUtil.parse(DateUtil.FORMAT2,oldUser.getCreateDate()));
                 userDao.save(user);
                 return  JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"用户修改成功");
-            }else {
+           }else {
                 return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"用户修改失败");
             }
         }catch (Exception e){
@@ -176,7 +178,7 @@ public class UserController {
         }
     }
 
-    @RequestMapping(value = "/changeUserPsw",method = RequestMethod.GET)
+    @RequestMapping(value = "/changeUserPsw",method = RequestMethod.POST)
     @ApiOperation(value = "修改用户密码",notes = "修改用户密码")
     public String changeUserPsw(@RequestParam String userCode,@RequestParam String userPsw,@RequestParam String oldUserPsw){
         try {

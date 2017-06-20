@@ -5,12 +5,11 @@ package com.zero.logic.domain;/**
 import com.zero.basic.domain.BasicBean;
 import com.zero.logic.util.DateUtil;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.text.ParseException;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * 图书类
@@ -86,7 +85,6 @@ public class Book extends BasicBean{
     @Column(name = "STORENUM")
     //库存量
     private int storeNum;
-
 
 
     //getter和setter方法
@@ -257,4 +255,5 @@ public class Book extends BasicBean{
     public void setStoreNum(int storeNum) {
         this.storeNum = storeNum;
     }
+
 }

@@ -3,6 +3,7 @@ import com.zero.logic.dao.BookDao;
 import com.zero.logic.dao.BookTypeDao;
 import com.zero.logic.domain.Book;
 import com.zero.logic.domain.BookType;
+import com.zero.logic.util.DateUtil;
 import com.zero.logic.util.JsonUtil;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,12 +26,21 @@ public class BookTypeController {
 
     @RequestMapping(value = "/addBookType",method = RequestMethod.POST)
     @ApiOperation(value = "BookType",notes = "新增图书分类")
-    public String addBookType(@RequestBody BookType bookType){
+    public String addBookType(@RequestBody BookType bookType,@RequestParam int level ){
         try {
             if (null!= bookType){
-                Date date = new Date();
-                bookType.setCreateDate(date);
-                bookType.setUpdateDate(date);
+                //level新增分类等级：-1--第一级，0--下级，1--同级
+                if (level==-1){
+                    bookType.setParent("00");
+                } else if (level==0){
+                    BookType oldBookType = bookTypeDao.getBookTypeByTypeId(bookType.getTypeId());
+                    bookType.setParent(oldBookType.getTypeId());
+                }else if(level==1){
+                    BookType oldBookType = bookTypeDao.getBookTypeByTypeId(bookType.getTypeId());
+                    bookType.setParent(oldBookType.getParent());
+                }
+                bookType.setCreateDate(new Date());
+                bookType.setUpdateDate(new Date());
                 bookTypeDao.save(bookType);
             }
         }catch (Exception e){
@@ -44,8 +54,10 @@ public class BookTypeController {
     @ApiOperation(value = "修改分类",notes = "修改图书分类")
     public String editBookType(@RequestBody BookType bookType){
         try {
-            if (null!= bookType){
+            BookType oldBookType = bookTypeDao.getBookTypeByTypeId(bookType.getTypeId());
+            if (null!= oldBookType){
                 bookType.setUpdateDate(new Date());//修改时间
+                bookType.setCreateDate(DateUtil.parse(DateUtil.FORMAT2,oldBookType.getCreateDate()));
                 bookTypeDao.save(bookType);
                 return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"修改图书分类成功");
             }else {
@@ -57,7 +69,7 @@ public class BookTypeController {
         }
     }
 
-    @RequestMapping(value = "/deleteBookType",method = RequestMethod.POST)
+    @RequestMapping(value = "/deleteBookType",method = RequestMethod.DELETE)
     @ApiOperation(value = "删除分类",notes = "删除图书分类")
     public String deleteBookType(@RequestParam String typeId){
         try {
@@ -91,14 +103,13 @@ public class BookTypeController {
         try {
             List<BookType> list = new ArrayList<>();
             BookType rootNote = bookTypeDao.getBookTypeByTypeId("00");//获取根目录节点
-            List<Object> strList =new ArrayList<>();
+           String strList =JsonUtil.fromObject(rootNote);
+            Map<String,Object> map =new HashMap<>();
             Iterable<BookType> allBookType = bookTypeDao.findAll();
             Iterator<BookType> iter = allBookType.iterator();
             while (iter.hasNext()){
                 BookType bookType = iter.next();
-                if (!"".equals(bookType.getParent())){
-                    list.add(bookType);
-                }
+                list.add(bookType);
             }
             String tree = recursionBookType(list,rootNote,strList);
             return tree;
@@ -120,7 +131,7 @@ public class BookTypeController {
         Iterator<BookType> it =list.iterator();
         while (it.hasNext()){
             BookType bookType = it.next();
-            if (bookType.getParent().equals(node.getTypeId())){
+            if (node.getTypeId().equals(bookType.getParent())){
                 nodeList.add(bookType);
             }
         }
@@ -136,13 +147,12 @@ public class BookTypeController {
      * @return
      * @throws Exception
      */
-    public String recursionBookType(List<BookType> list, BookType node,List<Object> strList) throws Exception {
+    public String recursionBookType(List<BookType> list, BookType node,String strList) throws Exception {
         List<BookType> childList = getChildList(list, node);//得到子节点列表
         if (childList.size()>0){
-            Map<String,Object> map =new HashMap<>();
+            Map<String,Object> map = new HashMap<>();
             map.put("children",childList);
-            String str = JsonUtil.makeJsonBeanByKey(node,map);
-            strList.add(str);
+            strList = JsonUtil.makeJsonBeanByKey(node,map);
             Iterator<BookType> it = childList.iterator();
 
             while (it.hasNext()){
@@ -150,7 +160,7 @@ public class BookTypeController {
                 recursionBookType(list,bookType,strList);
             }
         }
-        return JsonUtil.fromArray(strList);
+        return strList;
     }
 
     @RequestMapping(value = "/getBookType",method = RequestMethod.GET)
@@ -181,5 +191,21 @@ public class BookTypeController {
             return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"获取分类失败");
         }
 
+    }
+
+    @RequestMapping(value = "/getBookTypeByTypeId",method = RequestMethod.GET)
+    @ApiOperation(value = "获取分类",notes = "通过分类ID获取分类信息")
+    public String getBookTypeByTypeId(@RequestParam String typeId){
+        try {
+            BookType bookType = bookTypeDao.getBookTypeByTypeId(typeId);
+            if (null!=bookType){
+                return JsonUtil.fromObject(bookType);
+            }else {
+                return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"获取分类信息失败");
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"获取分类信息失败");
+        }
     }
 }
