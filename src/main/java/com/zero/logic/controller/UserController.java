@@ -1,6 +1,8 @@
 package com.zero.logic.controller;
+import com.zero.logic.dao.LogDao;
 import com.zero.logic.dao.RoleDao;
 import com.zero.logic.dao.UserDao;
+import com.zero.logic.domain.Log;
 import com.zero.logic.domain.Role;
 import com.zero.logic.domain.User;
 import com.zero.logic.util.DateUtil;
@@ -35,6 +37,9 @@ public class UserController {
     private UserDao userDao;
     @Autowired
     private RoleDao roleDao;
+    @Autowired
+    private LogDao logDao;
+
     @RequestMapping(value = "getByPage",method = RequestMethod.GET)
     @ApiOperation(value = "分页获取用户",notes = "分页获取用户")
     public String getByPage(
@@ -200,12 +205,14 @@ public class UserController {
 
     @RequestMapping(value = "login",method = RequestMethod.POST)
     @ApiOperation(value = "登录系统",notes = "登录系统")
-    public String login(@RequestBody User user){
+    public String login(@RequestBody Object object){
         try {
+            String userCode = JsonUtil.getString("userCode",object);
+            String userPsw = JsonUtil.getString("userPsw",object);
             Map<String, Object> map = new HashMap<>();
-            User oldUser = userDao.getUserByUserCode(user.getUserCode());
+            User oldUser = userDao.getUserByUserCode(userCode);
             if(null!=oldUser&&oldUser.getState()!=0){
-                String userPsw = MD5Util.getMd5(user.getUserCode(),user.getUserPsw());
+                 userPsw = MD5Util.getMd5(userCode,userPsw);
                 if(oldUser.getUserPsw().equals(userPsw)){
                     //用户登录成功后返回一个user对象给前端时(不返回密码)
                     oldUser.setUserPsw("");

@@ -1,9 +1,7 @@
 package com.zero.logic.domain;
 import com.zero.basic.domain.BasicBean;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+
+import javax.persistence.*;
 
 /**
  * 日志类
@@ -16,13 +14,14 @@ import javax.persistence.Table;
 public class Log extends BasicBean {
     @Id
     @Column(name = "LOGID")
+    @GeneratedValue(strategy=GenerationType.AUTO)
     private String logId;//日志id
     @Column(name = "LOGCONTENT")
     private String logContent;//日志内容
     @Column(name = "TYPE")
     private int type;//日志类型 0=操作日志；1=数据库日志；2=系统日志
     @Column(name = "LEVER")
-    private int lever;//
+    private int lever;//日志级别 0=debug；1=info；2=warn；3=errer
     @Column(name = "USERCODE")
     private String userCode;//操作用户
 

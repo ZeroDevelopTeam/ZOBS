@@ -11,7 +11,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
  * @creat 2017/6/20
  */
 @Configuration
-public class MyWebAppConfigurer extends WebMvcConfigurerAdapter{
+public class StateResourceConfigurer extends WebMvcConfigurerAdapter{
     /**
      * 配置访问静态资源
      * @param registry

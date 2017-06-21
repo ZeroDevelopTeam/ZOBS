@@ -16,4 +16,11 @@ public interface BookTypeDao extends CrudRepository<BookType,Integer> {
      * @return
      */
     public BookType getBookTypeByTypeId(String typeId);
+
+    /**
+     * 根据分类父ID获取分类
+     * @param parent 父类Id
+     * @return 分类信息
+     */
+    public BookType getBookTypeByParent(String parent);
 }

@@ -64,6 +64,29 @@ public class BookController {
         }
     }
 
+    @RequestMapping(value = "/getBooksByTypeId",method = RequestMethod.GET)
+    @ApiOperation(value = "根据分类ID获取图书",notes = "根据分类ID获取图书")
+    public String getBooksByTypeId(
+           @RequestParam("typeId")String typeId,
+           @RequestParam(value = "pageNum", defaultValue = "0") Integer pageNum,
+           @RequestParam(value = "pageSize", defaultValue = "15") Integer pageSize){
+        try {
+            Sort sort = new Sort(Sort.Direction.DESC,"typeId");
+            Pageable pageable = new PageRequest(pageNum-1,pageSize,sort);
+            Page<Book> books =bookDao.findBookByTypeId(typeId,pageable);
+            List<Object> list = new ArrayList<>();
+            for (Book book:books){
+                list.add(book);
+            }
+            long total = bookDao.countAllByTypeId(typeId);
+            long totalPage = total%pageSize==0? total/pageSize:total/pageSize+1;//总页数
+            return TableUtil.createTableDate(list,total,pageNum,totalPage,pageSize);
+        }catch (Exception e){
+            e.printStackTrace();
+            return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"根据分类ID获取图书失败");
+        }
+    }
+
     @RequestMapping(value = "/addBook",method = RequestMethod.POST)
     @ApiOperation(value = "新增图书",notes = "新增图书")
     public String addBook(@RequestBody Book book){
