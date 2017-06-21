@@ -17,8 +17,8 @@ import java.util.List;
 /**
  * 订控制类
  *
- * @autherAdmin Deram Zhao
- * @creat 2017/6/19
+ * @auther Deram Zhao
+ * @creatTime 2017/6/19
  */
 @RestController
 @RequestMapping("order")

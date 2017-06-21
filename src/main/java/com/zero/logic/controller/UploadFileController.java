@@ -5,13 +5,11 @@ import io.swagger.annotations.ApiOperation;
 import net.sf.json.JSONException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
  * 文件上传控制类
- *
- * @autherAdmin Deram Zhao
- * @creat 2017/6/12
+ * @auther Deram Zhao
+ * @creatTime 2017/6/12
  */
 @RestController
 @RequestMapping("upload")

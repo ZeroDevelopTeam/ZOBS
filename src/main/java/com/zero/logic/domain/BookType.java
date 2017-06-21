@@ -1,6 +1,4 @@
-package com.zero.logic.domain;/**
- * Created by Admin on 2017/6/15.
- */
+package com.zero.logic.domain;
 
 import com.zero.basic.domain.BasicBean;
 

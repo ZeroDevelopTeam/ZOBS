@@ -7,7 +7,7 @@ import org.springframework.core.io.support.PropertiesLoaderUtils;
 import java.util.Properties;
 
 /**
- * 获取文件上传路径
+ * 文件上传配置类
  *
  * @autherAdmin Deram Zhao
  * @creat 2017/6/12

@@ -5,10 +5,9 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 /**
- * 自定义配置类
- *
- * @autherAdmin Deram Zhao
- * @creat 2017/6/20
+ * 静态资源配置类
+ * @auther Deram Zhao
+ * @creatTime 2017/6/20
  */
 @Configuration
 public class StateResourceConfigurer extends WebMvcConfigurerAdapter{

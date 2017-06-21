@@ -5,9 +5,8 @@ import javax.persistence.*;
 
 /**
  * 日志类
- *
- * @autherAdmin Deram Zhao
- * @creat 2017/6/9
+ * @auther Deram Zhao
+ * @creatTime 2017/6/9
  */
 @Entity
 @Table(name = "sys_log")

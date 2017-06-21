@@ -12,17 +12,16 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 
 /**
- * 工具接口
- *
- * @autherAdmin Deram Zhao
- * @creat 2017/6/15
+ * 工具控制类
+ * @auther Deram Zhao
+ * @creatTime 2017/6/15
  */
 
 @RestController
 @RequestMapping("util")
 public class UtilController {
     @RequestMapping(value = "downloadImg",method = RequestMethod.GET)
-    @ApiOperation(value = "img",notes = "下载图片")
+    @ApiOperation(value = "下载图片",notes = "根据文件名下载服务器图片")
     public String img(@RequestParam("fileName") String fileName,HttpServletResponse response){
         try {
             DownloadUtil.downloadImg(System.getProperty("user.dir")+ File.separator+"upload"

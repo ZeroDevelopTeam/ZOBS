@@ -11,23 +11,19 @@ import com.zero.logic.util.MD5Util;
 import com.zero.logic.util.TableUtil;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
-
-import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.util.*;
 
 /**
  * 用户控制类
- *
- * @autherAdmin Deram Zhao
- * @creat 2017/6/1
+ * @auther Deram Zhao
+ * @creatTime 2017/6/1
  */
 @RestController
 @RequestMapping("/user")

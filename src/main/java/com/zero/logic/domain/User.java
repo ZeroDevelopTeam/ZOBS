@@ -1,7 +1,6 @@
 package com.zero.logic.domain;
 
 import com.zero.basic.domain.BasicBean;
-import org.hibernate.annotations.*;
 import javax.persistence.*;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -10,7 +9,6 @@ import javax.persistence.Table;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.hibernate.annotations.CascadeType.SAVE_UPDATE;
 
 /**
  * 用户实体类
@@ -36,7 +34,7 @@ public class User extends BasicBean{
     //用户地址
     @Column(name = "ADDRESS")
     private String address;
-    //0为停用、1为启用
+    //0为停用、1为启用、2为待激活
     @Column(name = "STATE")
     private int state;
     //用户邮箱
