@@ -26,7 +26,7 @@ public class Purview extends BasicBean {
     //权限备注
     private String purviewDesc;
     @Column(name = "STATE")
-    //权限状态
+    //权限状态 0--停用，1--启用
     private int state;
     //getter和setter方法
     public String getPurviewId() {

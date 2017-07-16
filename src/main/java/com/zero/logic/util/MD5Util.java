@@ -19,4 +19,15 @@ public class MD5Util {
     public static String getMd5(String userCode,String password){
         return DigestUtils.md5DigestAsHex((userCode+password).getBytes());
     }
+
+    /**
+     * 将账号+数字签证有效期+秘钥通过MD5加密(不可逆)
+     * @param userCode
+     * @param outDate
+     * @param key
+     * @return 数字签证加密后的字符串
+     */
+    public static String checkKey(String userCode,String outDate,String key){
+        return DigestUtils.md5DigestAsHex((userCode+outDate+key).getBytes());
+    }
 }

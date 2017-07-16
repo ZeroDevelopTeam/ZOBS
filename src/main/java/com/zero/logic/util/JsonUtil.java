@@ -3,7 +3,9 @@ package com.zero.logic.util;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 /**
  * json格式
@@ -85,5 +87,19 @@ public class JsonUtil {
         }else{
             return null;
         }
+    }
+
+    /**
+     * 将JSONArray 转换成 list
+     * @param object
+     * @return list集合
+     */
+    public static List getList(Object object){
+        JSONArray jsonArray = JSONArray.fromObject(object);
+        List<Object> list = new ArrayList<>();
+        for (Object obj:jsonArray){
+            list.add(obj);
+        }
+        return  list;
     }
 }

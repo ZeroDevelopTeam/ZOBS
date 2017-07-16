@@ -1,4 +1,6 @@
-package com.zero.logic.domain;
+package com.zero.logic.domain;/**
+ * Created by Admin on 2017/6/12.
+ */
 
 import com.zero.basic.domain.BasicBean;
 import com.zero.logic.util.DateUtil;
@@ -6,13 +8,14 @@ import com.zero.logic.util.DateUtil;
 import javax.persistence.*;
 import java.text.ParseException;
 import java.util.Date;
-
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * 图书类
  *
- * @auther Deram Zhao
- * @creatTime 2017/6/12
+ * @autherAdmin Deram Zhao
+ * @creat 2017/6/12
  */
 @Entity
 @Table(name = "sys_book")
@@ -34,6 +37,15 @@ public class Book extends BasicBean{
     @Column(name = "DISCOUNT")
     //折扣
     private double discount;
+
+    public int getBookNum() {
+        return bookNum;
+    }
+
+    public void setBookNum(int bookNum) {
+        this.bookNum = bookNum;
+    }
+
     @Column(name = "PRESS")
     //出版社
     private String press;
@@ -66,7 +78,7 @@ public class Book extends BasicBean{
     private String image_l;
     @Column(name = "IMAGE_S")
     //小图路径
-    private String image_s;
+    private String [] image_s;
     @Column(name = "ORDERBY")
     //排序
     private int orderBy;
@@ -78,10 +90,10 @@ public class Book extends BasicBean{
     private String bookDesc;
     @Column(name = "STATE")
     //图书状态
-    private int state;
-    @Column(name = "STORENUM")
+    private int state;//未上架0，已经上架1；
+    @Column(name = "BOOKNUM")
     //库存量
-    private int storeNum;
+    private int bookNum;
 
 
     //getter和setter方法
@@ -205,11 +217,11 @@ public class Book extends BasicBean{
         this.image_l = image_l;
     }
 
-    public String getImage_s() {
+    public String[] getImage_s() {
         return image_s;
     }
 
-    public void setImage_s(String image_s) {
+    public void setImage_s(String[] image_s) {
         this.image_s = image_s;
     }
 
@@ -245,12 +257,5 @@ public class Book extends BasicBean{
         this.state = state;
     }
 
-    public int getStoreNum() {
-        return storeNum;
-    }
-
-    public void setStoreNum(int storeNum) {
-        this.storeNum = storeNum;
-    }
 
 }

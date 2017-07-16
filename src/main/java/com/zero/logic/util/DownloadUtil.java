@@ -1,22 +1,22 @@
-package com.zero.logic.util;
+package com.zero.logic.util;/**
+ * Created by Admin on 2017/6/14.
+ */
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 
 /**
  * 下载工具类
- * @auther Deram Zhao
- * @creatTime 2017/6/14
+ *
+ * @autherAdmin Deram Zhao
+ * @creat 2017/6/14
  */
 public class DownloadUtil {
-    /**
-     * 下载图片
-     * @param path 文件路径
-     * @param response 响应对象
-     */
+
     public static void downloadImg(String path, HttpServletResponse response){
         InputStream in =null;
         OutputStream out = null;
+
         try {
             response.setContentType("image/jpeg");
             in = new FileInputStream(path);
@@ -36,8 +36,8 @@ public class DownloadUtil {
 
     /**
      * 关闭资源
-     * @param closeable 可关闭的资源
-     * @return 关闭的资源
+     * @param closeable
+     * @return
      */
     private static Closeable closeSilently(Closeable closeable) {
         try {

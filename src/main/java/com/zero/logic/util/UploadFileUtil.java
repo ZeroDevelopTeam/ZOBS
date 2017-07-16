@@ -9,16 +9,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 文件上传工具类
- * @auther Deram Zhao
- * @creatT 2017/6/12
+ * 文件上传
+ *
+ * @autherAdmin Deram Zhao
+ * @creat 2017/6/12
  */
 public class UploadFileUtil {
 
     /**
      * 单个文件上传
-     * @param file 文件
-     * @return msg 返回信息
+     * @param file
+     * @return msg
      */
     public static  String singleFileUpload(MultipartFile file){
         if(file.isEmpty()){
@@ -32,24 +33,13 @@ public class UploadFileUtil {
             return "不能上传应用程序文件";
         }
         try {
-            //获取已存在的文件名
-           // List<String> list = getExistsFile(UploadFileConfigUtil.uploadFilePath);
-            //for (String oldFileName:list){
-                //if(oldFileName.equals(file.getOriginalFilename())){
-                   // System.out.print("上传的文件："+file.getOriginalFilename()+"已经存在目录"+UploadFileConfigUtil.uploadFilePath);
-               // }
-            //}
             //获取文件、保存文件
             byte[] bytes = file.getBytes();
-            BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(new File(UploadFileConfigUtil.uploadFilePath+"/"+file.getOriginalFilename())));
-            out.write(file.getBytes());
+            BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(new File(UploadFilePathUtil.uploadFilePath+"/"+file.getOriginalFilename())));
+            out.write(bytes);
             out.flush();
             out.close();
 
-            /*获取文件、保存文件的第二只中写法
-            Path path = Paths.get(UPLOAD_FOLDER+file.getOriginalFilename());//保存文件路径
-            Files.write(path,bytes);//文件写入
-             */
         }catch (IOException e){
             e.printStackTrace();
             return "文件上传失败";
@@ -63,10 +53,10 @@ public class UploadFileUtil {
      * @return
      */
     public static boolean scopeFileSize(MultipartFile file){
-        if(UploadFileConfigUtil.uploadFileSize == null){//如果用户不设置则不作限制
+        if(UploadFilePathUtil.uploadFileSize == null){//如果用户不设置则不作限制
             return true;
         }
-        long fileSize = Integer.parseInt(UploadFileConfigUtil.uploadFileSize)*1024*1024;//单位为：字节
+        long fileSize = Integer.parseInt(UploadFilePathUtil.uploadFileSize)*1024*1024;//单位为：字节
         if(file.getSize()>0 && file.getSize()<fileSize){
             return true;
         }else {
@@ -98,5 +88,43 @@ public class UploadFileUtil {
             fileNameList.add(file.getName());
         }
         return  fileNameList;
+    }
+
+
+
+
+    /**
+     * 多个文件上传
+     * @param files
+     * @return
+     */
+    public static String moreFileUpload(MultipartFile[] files){
+        if(files!=null && files.length>=1){
+            BufferedOutputStream bs = null;
+            MultipartFile file = null;
+            for(int i = 0;i<files.length;i++){
+                file = files[i];
+
+                if(file.isEmpty()){
+                    return "第"+i+"个文件为空上传失败";
+                }
+                if(!file.isEmpty()){
+                    try{
+                        if(!scopeFileSize(file)){//上传文件大小限制
+                            return  "第"+i+"个文件:"+file.getOriginalFilename()+"超过文件上传大小限制";
+                        }
+                        byte[] bytes = file.getBytes();
+                        bs = new BufferedOutputStream(new FileOutputStream(new File(UploadFilePathUtil.uploadFilePath+"/"+file.getOriginalFilename())));
+                        bs.write(bytes);
+                        bs.flush();
+                        bs.close();
+                    }catch(IOException e){
+                        e.printStackTrace();
+                        return "第"+i+"个文件:"+file.getOriginalFilename()+"上传失败";
+                    }
+                }
+            }
+        }
+        return  "文件上传成功";
     }
 }

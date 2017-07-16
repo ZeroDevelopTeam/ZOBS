@@ -11,15 +11,15 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 /**
  * 日志控制类
- * @auther Deram Zhao
- * @creatTime 2017/6/9
+ *
+ * @autherAdmin Deram Zhao
+ * @creat 2017/6/9
  */
 @RestController
 @RequestMapping("log")

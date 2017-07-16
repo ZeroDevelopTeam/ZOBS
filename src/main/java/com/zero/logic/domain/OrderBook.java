@@ -6,8 +6,9 @@ import javax.persistence.*;
 
 /**
  * 订单图书实体类
- * @auther Deram Zhao
- * @creatTime 2017/6/19
+ *
+ * @autherAdmin Deram Zhao
+ * @creat 2017/6/19
  */
 @Entity
 @IdClass(OrderBookPK.class)
@@ -23,8 +24,12 @@ public class OrderBook extends BasicBean{
     @Column(name = "BOOKID")
     private String bookId;
     //订购数量
-    @Column(name = "ORDERNUM")
-    private int orderNum;
+    @Column(name = "BOOKNUM")
+    private int bookNum;
+
+    //状态 退款5，退款退货6
+    @Column(name = "STATE")
+    private int state;
 
     public String getOrderId() {
         return orderId;
@@ -42,12 +47,19 @@ public class OrderBook extends BasicBean{
         this.bookId = bookId;
     }
 
-    public int getOrderNum() {
-        return orderNum;
+    public int getBookNum() {
+        return bookNum;
     }
 
-    public void setOrderNum(int orderNum) {
-        this.orderNum = orderNum;
+    public void setBookNum(int bookNum) {
+        this.bookNum = bookNum;
     }
 
+    public int getState() {
+        return state;
+    }
+
+    public void setState(int state) {
+        this.state = state;
+    }
 }

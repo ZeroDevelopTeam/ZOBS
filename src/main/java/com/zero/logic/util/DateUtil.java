@@ -27,6 +27,9 @@ public class DateUtil {
      * @throws ParseException
      */
     public static Date parse(DateFormat format, String dateStr) throws ParseException {
+        if (null==dateStr || "".equals(dateStr)){
+            return null;
+        }
         return format.parse(dateStr);
     }
 
@@ -38,7 +41,11 @@ public class DateUtil {
      * @throws ParseException
      */
     public static String formatDate(DateFormat format,Date date)throws ParseException{
-
-        return format.format(date);
+        if (null!=date){
+            return format.format(date);
+        }else {
+            return null;
+        }
     }
+
 }

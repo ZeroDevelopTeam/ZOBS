@@ -1,7 +1,9 @@
 package com.zero.logic.controller;
 
+import com.zero.logic.dao.LogDao;
 import com.zero.logic.dao.PurviewDao;
 import com.zero.logic.dao.RoleDao;
+import com.zero.logic.domain.Log;
 import com.zero.logic.domain.Purview;
 import com.zero.logic.domain.Role;
 import com.zero.logic.util.DateUtil;
@@ -15,9 +17,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+
 /**
  * 角色控制类
  * @auther Deram Zhao
@@ -30,6 +31,8 @@ public class RoleController {
     private RoleDao roleDao;
     @Autowired
     private PurviewDao purviewDao;
+    @Autowired
+    private LogDao logDao;
 
     @RequestMapping(value = "addRole", method = RequestMethod.POST)
     @ApiOperation(value = "新增角色", notes = "新增角色信息")
@@ -43,6 +46,8 @@ public class RoleController {
             role.setCreateDate(new Date());
             role.setUpdateDate(new Date());
             roleDao.save(role);
+            //记录日志
+            logDao.save(new Log(new Date(),new Date(),"新增角色"+role.getRoleName()+"信息成功",0,""));
             return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS, "新增角色信息成功");
         } catch (Exception e) {
             return JsonUtil.returnStr(JsonUtil.RESULT_FAIL, "新增角色信息失败");
@@ -67,8 +72,12 @@ public class RoleController {
             role.setCreateDate(DateUtil.parse(DateUtil.FORMAT2,oldRole.getCreateDate()));
             roleDao.save(role);
             if ("".equals(unPurviewId)){
+                //记录日志
+                logDao.save(new Log(new Date(),new Date(),"修改角色成功"+role.getRoleName()+"信息成功",0,""));
                 return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS, "修改角色成功");
             }else {
+                //记录日志
+                logDao.save(new Log(new Date(),new Date(),"修改角色成功"+role.getRoleName()+"信息成功",0,""));
                 return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS, "修改角色成功,权限"+unPurviewId+"不存在或者为停用，角色未拥有这些权限");
             }
         } catch (Exception e) {
@@ -82,21 +91,36 @@ public class RoleController {
     public String deleteRoles(@RequestParam String []roleIds){
         try {
             String unDeleteId="";
+            String deleteIds="";
             for (int i=0;i<roleIds.length;i++){
                 String roleId = roleIds[i];
-                Role role = roleDao.getRoleByRoleId(roleId);
-                if(null!=role&&role.getState()==0) {
-                    roleDao.delete(role);
-                }else if (role.getState()==1){
-                    unDeleteId +=roleId+"、";
+                List<Object> userRoles = roleDao.getObj(roleId);
+                if (userRoles.size()>0){//如果有用户引用角色则不能删除该角色
+                    return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"该角色有用户引用不能删除，删除失败");
+                }
+                Role oldrRole = roleDao.getRoleByRoleId(roleId);
+                if(null!=oldrRole&&oldrRole.getState()==0) {
+                    roleDao.delete(oldrRole);
+                    deleteIds +=roleId+"，";
+                }else if (oldrRole.getState()==1){
+                    unDeleteId +=roleId;
                 }
             }
             if ("".equals(unDeleteId)){
+                //记录日志
+                logDao.save(new Log(new Date(),new Date(),"删除角色"+deleteIds+"成功",0,""));
                 return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"删除角色成功");
             }else {
-                return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"除" + unDeleteId + "角色未停用，其余删除角色成功");
+                if (roleIds[0].length()==unDeleteId.length()){//删除单个角色
+                    return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"" + unDeleteId + "角色未停用，删除角色失败");
+                }else {
+                    //记录日志
+                    logDao.save(new Log(new Date(),new Date(),"删除角色"+deleteIds+"成功",0,""));
+                    return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"除" + unDeleteId + "角色未停用，其余角色删除成功");
+                }
             }
         }catch (Exception e){
+            e.printStackTrace();
             return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"删除角色失败");
         }
     }
@@ -142,6 +166,7 @@ public class RoleController {
             @RequestParam("state")int state){
          try {
              String unRoleState="";
+             String roleStates ="";
              for (int i=0;i<roleIds.length;i++){
                  String roleId = roleIds[i];
                  Role oldRole = roleDao.getRoleByRoleId(roleId);
@@ -150,13 +175,18 @@ public class RoleController {
                      oldRole.setUpdateDate(new Date());//修改时间
                      oldRole.setCreateDate(DateUtil.parse(DateUtil.FORMAT2,oldRole.getCreateDate()));
                      roleDao.save(oldRole);
+                     roleStates +=roleId;
                  }else {
                      unRoleState +=roleId;
                  }
              }
              if ("".equals(unRoleState)){
+                 //记录日志
+                 logDao.save(new Log(new Date(),new Date(),"修改角色"+roleStates+"状态成功",0,""));
                  return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS, "修改角色状态成功");
              }else {
+                 //记录日志
+                 logDao.save(new Log(new Date(),new Date(),"修改角色"+roleStates+"状态成功",0,""));
                  return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS, "除了角色"+unRoleState+"状态修改失败，其余角色状态修改成功");
              }
          }catch (Exception e){

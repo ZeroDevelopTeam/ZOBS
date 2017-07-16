@@ -1,14 +1,19 @@
 package com.zero.logic.domain;
 
 import com.zero.basic.domain.BasicBean;
+import com.zero.logic.util.DateUtil;
+import org.hibernate.annotations.*;
 import javax.persistence.*;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
 
+import java.text.ParseException;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import static org.hibernate.annotations.CascadeType.SAVE_UPDATE;
 
 /**
  * 用户实体类
@@ -34,12 +39,19 @@ public class User extends BasicBean{
     //用户地址
     @Column(name = "ADDRESS")
     private String address;
-    //0为停用、1为启用、2为待激活
+    //0为停用、1为启用
     @Column(name = "STATE")
     private int state;
     //用户邮箱
     @Column(name = "EMAIL")
     private String email;
+    //修改密码秘钥
+    @Column(name = "VERIFYCODE")
+    private String verifyCode;
+
+    //秘钥失效时间
+    @Column(name = "OUTDATE")
+    private Date outDate;
 
     @ManyToMany
     @JoinTable(name="sys_user_role",
@@ -108,4 +120,19 @@ public class User extends BasicBean{
 
     public void setRoles(Set<Role> set) {this.roles = roles;}
 
+    public String getVerifyCode() {
+        return verifyCode;
+    }
+
+    public void setVerifyCode(String verifyCode) {
+        this.verifyCode = verifyCode;
+    }
+
+    public String getOutDate() throws ParseException {
+        return DateUtil.formatDate(DateUtil.FORMAT2,outDate);
+    }
+
+    public void setOutDate(Date outDate) {
+        this.outDate = outDate;
+    }
 }

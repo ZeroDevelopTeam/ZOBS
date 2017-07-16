@@ -1,6 +1,8 @@
 package com.zero.logic.controller;
 
+import com.zero.logic.dao.LogDao;
 import com.zero.logic.dao.PurviewDao;
+import com.zero.logic.domain.Log;
 import com.zero.logic.domain.Purview;
 import com.zero.logic.util.DateUtil;
 import com.zero.logic.util.JsonUtil;
@@ -28,7 +30,8 @@ import java.util.List;
 public class PurviewController {
     @Autowired
     private PurviewDao purviewDao;
-
+    @Autowired
+    private LogDao logDao;
     @RequestMapping(value = "/addPurview",method = RequestMethod.POST)
     @ApiOperation(value = "新增权限",notes = "新增权限信息")
     public String addPurview(@RequestBody Purview purview) {
@@ -36,6 +39,8 @@ public class PurviewController {
             purview.setCreateDate(new Date());
             purview.setUpdateDate(new Date());
             purviewDao.save(purview);
+            //记录日志
+            logDao.save(new Log(new Date(),new Date(),"新增权限"+purview.getPurviewId()+"成功",0,""));
             return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"新增权限成功" );
         } catch (Exception e) {
             return JsonUtil.returnStr(JsonUtil.RESULT_FAIL, "新增权限失败");
@@ -51,6 +56,8 @@ public class PurviewController {
                 purview.setUpdateDate(new Date());//修改时间
                 purview.setCreateDate(DateUtil.parse(DateUtil.FORMAT2,oldPurview.getCreateDate()));//权限创建时间
                 purviewDao.save(purview);
+                //记录日志
+                logDao.save(new Log(new Date(),new Date(),"修改权限"+purview.getPurviewId()+"成功",0,""));
                 return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS, "修改权限成功");
             } else {
                 return JsonUtil.returnStr(JsonUtil.RESULT_FAIL, "修改权限失败");
@@ -77,18 +84,27 @@ public class PurviewController {
     public String deletePurviews(@RequestParam String []purviewIds){
         try {
             String unPurviewId="";
+            String deletePurviews="";
             for (int i=0;i<purviewIds.length;i++){
                 String purviewId = purviewIds[i];
+                List<Object> rolePurviews = purviewDao.getObj(purviewId);
+                if (rolePurviews.size()>0){
+                    return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"该权限有角色引用不能删除，删除失败");
+                }
                 Purview purview=purviewDao.getPurviewByPurviewId(purviewId);
                 if(null!=purview&&purview.getState()==0){
                     purviewDao.delete(purview);
+                    deletePurviews +=purviewId+",";
                 }else if (purview.getState()==1){
                     unPurviewId +=purviewId+"、";
                 }
             }
             if ("".equals(unPurviewId)){
+                //记录日志
+                logDao.save(new Log(new Date(),new Date(),"删除权限"+deletePurviews+"成功",0,""));
                 return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"删除权限成功");
             }else {
+                logDao.save(new Log(new Date(),new Date(),"删除权限"+deletePurviews+"成功",0,""));
                 return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"除了"+unPurviewId+"权限未停用，其余权限删除成功");
             }
         }catch (Exception e){
@@ -127,6 +143,7 @@ public class PurviewController {
 
         try {
             String unPurviewId="";
+            String purviewStates="";
             for (int i=0;i<purviewIds.length;i++){
                 String purviewId = purviewIds[i];
                 Purview oldPurview = purviewDao.getPurviewByPurviewId(purviewId);
@@ -135,13 +152,18 @@ public class PurviewController {
                     oldPurview.setUpdateDate(new Date());//修改时间
                     oldPurview.setCreateDate(DateUtil.parse(DateUtil.FORMAT2,oldPurview.getCreateDate()));
                     purviewDao.save(oldPurview);
+                    purviewStates +=purviewId+"，";
                 }else {
                     unPurviewId +=purviewId+"、";
                 }
             }
             if ("".equals(unPurviewId)){
+                //记录日志
+                logDao.save(new Log(new Date(),new Date(),"修改权限"+purviewStates+"状态成功",0,""));
                 return  JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"修改权限状态成功");
             }else {
+                //记录日志
+                logDao.save(new Log(new Date(),new Date(),"修改权限"+purviewStates+"状态成功",0,""));
                 return  JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"除了"+unPurviewId+"权限状态修改失败，其余的修改成功");
             }
         }catch (Exception e){
@@ -149,6 +171,5 @@ public class PurviewController {
             return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"修改权限状态失败");
         }
     }
-
 
 }

@@ -1,20 +1,24 @@
 package com.zero.logic.domain;
 import com.zero.basic.domain.BasicBean;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.util.Date;
 
 /**
  * 日志类
- * @auther Deram Zhao
- * @creatTime 2017/6/9
+ *
+ * @autherAdmin Deram Zhao
+ * @creat 2017/6/9
  */
 @Entity
 @Table(name = "sys_log")
 public class Log extends BasicBean {
     @Id
+    @GeneratedValue(generator="system-uuid")
+    @GenericGenerator(name="system-uuid", strategy = "uuid")
     @Column(name = "LOGID")
-    @GeneratedValue(strategy=GenerationType.AUTO)
-    private String logId;//日志id
+    private String logId;//日志id 
     @Column(name = "LOGCONTENT")
     private String logContent;//日志内容
     @Column(name = "TYPE")
@@ -26,7 +30,11 @@ public class Log extends BasicBean {
 
     public Log(){}
 
-    public Log(int lever,String logContent,int type,String userCode){
+    public Log(Date creatDate,Date updateDate, String logContent, int type, String userCode){
+        this.setCreateDate(creatDate);
+        this.setLogContent(logContent);
+        this.setType(type);
+        this.setUserCode(userCode);
 
     }
     public String getLogId() {

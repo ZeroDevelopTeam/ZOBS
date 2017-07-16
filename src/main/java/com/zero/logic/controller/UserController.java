@@ -1,14 +1,12 @@
 package com.zero.logic.controller;
+import com.zero.basic.filter.BasicFilter;
 import com.zero.logic.dao.LogDao;
 import com.zero.logic.dao.RoleDao;
 import com.zero.logic.dao.UserDao;
 import com.zero.logic.domain.Log;
 import com.zero.logic.domain.Role;
 import com.zero.logic.domain.User;
-import com.zero.logic.util.DateUtil;
-import com.zero.logic.util.JsonUtil;
-import com.zero.logic.util.MD5Util;
-import com.zero.logic.util.TableUtil;
+import com.zero.logic.util.*;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,19 +14,31 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.Serializable;
 import java.text.ParseException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 用户控制类
- * @auther Deram Zhao
- * @creatTime 2017/6/1
+ *
+ * @autherAdmin Deram Zhao
+ * @creat 2017/6/1
  */
 @RestController
 @RequestMapping("/user")
 public class UserController {
 
+    @Autowired
+    private RedisTemplate redisTemplate;
     @Autowired
     private UserDao userDao;
     @Autowired
@@ -77,7 +87,7 @@ public class UserController {
 
     @RequestMapping(value = "/addUser",method = RequestMethod.POST)
     @ApiOperation(value = "新增用户",notes = "新增用户信息")
-    public String addUser(@RequestBody User user,@RequestParam String [] roles){
+    public String addUser(@RequestBody User user,@RequestParam String [] roles,HttpServletRequest req){
                 try {
                     for (String roleId:roles){
                         Role role = roleDao.getRoleByRoleId(roleId);
@@ -89,16 +99,32 @@ public class UserController {
                     user.setCreateDate(new Date());
                     user.setUpdateDate(new Date());
                     userDao.save(user);
+                    //记录日志
+                    logDao.save(new Log(new Date(),new Date(),"新增用户"+user.getUserName()+"成功",0,BasicFilter.user_id));
                     return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS, "新增用户信息成功");
                 }catch (Exception e){
                     e.printStackTrace();
                     return JsonUtil.returnStr(JsonUtil.RESULT_FAIL, "新增用户信息失败");
                 }
     }
+    @RequestMapping(value = "/registerUser",method = RequestMethod.POST)
+    @ApiOperation(value = "注册用户",notes = "注册用户")
+    public String registerUser(@RequestBody User user){
+        try {
+            user.setUserPsw(MD5Util.getMd5(user.getUserCode(),user.getUserPsw()));
+            user.setCreateDate(new Date());
+            user.setUpdateDate(new Date());
+            userDao.save(user);
+            return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"注册成功");
+        }catch (Exception e){
+            e.printStackTrace();
+            return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"注册失败");
+        }
+    }
 
     @RequestMapping(value = "/editUser",method = RequestMethod.POST)
     @ApiOperation(value = "修改用户",notes = "根据用户编号修改用户")
-    public String editUser(@RequestBody User user,@RequestParam String [] roleIds) throws ParseException {
+    public String editUser(@RequestBody User user,@RequestParam String [] roleIds,HttpServletRequest req) throws ParseException {
         try {
             User oldUser = userDao.getUserByUserCode(user.getUserCode());
             if(null!=oldUser){
@@ -110,10 +136,16 @@ public class UserController {
                         user.getRoles().add(role);
                     }
                 }
-                user.setUserPsw(MD5Util.getMd5(user.getUserCode(),user.getUserPsw()));
+                if (!oldUser.getUserPsw().equals(user.getUserPsw())){
+                    user.setUserPsw(MD5Util.getMd5(user.getUserCode(),user.getUserPsw()));
+                }else {
+                    user.setUserPsw(oldUser.getUserPsw());
+                }
                 user.setUpdateDate(new Date());//修改时间
-                user.setCreateDate(DateUtil.parse(DateUtil.FORMAT2,oldUser.getCreateDate()));
+                user.setCreateDate(DateUtil.parse(DateUtil.FORMAT2,user.getCreateDate()));
                 userDao.save(user);
+                //记录日志
+                logDao.save(new Log(new Date(),new Date(),"修改用户"+user.getUserCode()+"成功",0,BasicFilter.user_id));
                 return  JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"用户修改成功");
            }else {
                 return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"用户修改失败");
@@ -126,22 +158,32 @@ public class UserController {
 
     @RequestMapping(value = "/deleteUsers",method = RequestMethod.DELETE)
     @ApiOperation(value = "删除用户",notes = "根据用户编号删除用户")
-    public String deleteUsers(@RequestParam String []userCodes) {
+    public String deleteUsers(@RequestParam String []userCodes,HttpServletRequest req) {
         try {
+            String deleteId ="";
             String unDeleteId="";
             for (int i=0;i<userCodes.length;i++){
                 String userCode = userCodes[i];
                 User oldUser = userDao.getUserByUserCode(userCode);
-                if (oldUser.getState()!=0){//只能删除停用的用户
+                if (oldUser.getState()==0){//只能删除停用的用户
                     userDao.delete(oldUser);
-                }else {
+                    deleteId +=userCode+"，";
+                }else if (oldUser.getState()==1){
                     unDeleteId +=userCode;
                 }
             }
             if ("".equals(unDeleteId)){
+                //记录日志
+                logDao.save(new Log(new Date(),new Date(),"删除用户"+deleteId+"成功",0,req.getHeader("user_id")));
                 return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"删除用户成功");
             }else {
-                return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"除了" + unDeleteId + "用户未停用，其余用户删除成功");
+                //记录日志
+                logDao.save(new Log(new Date(),new Date(),"删除用户"+deleteId+"成功",0,req.getHeader("user_id")));
+                if (userCodes[0].length()==unDeleteId.length()){//单个用户
+                    return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"" + unDeleteId + "用户未停用，删除失败");
+                }else {
+                    return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"" + unDeleteId + "用户未停用，其余用户删除成功");
+                }
             }
         }catch (Exception e){
             e.printStackTrace();
@@ -153,25 +195,44 @@ public class UserController {
     @ApiOperation(value = "修改用户状态",notes = "修改单个或多个用户账号状态")
     public String changeUserState(
             @RequestParam("userCodes") String [] userCodes,
-            @RequestParam("state")int state){
+            @RequestParam("state")int state,HttpServletRequest req){
         try {
+            String userState ="";
             String unUserState="";
+            String ownState="";
             for (int i=0;i<userCodes.length;i++){
                 String userCode = userCodes[i];
                 User oldUser = userDao.getUserByUserCode(userCode);
                 if (null!=oldUser){
-                    oldUser.setState(state);
-                    oldUser.setUpdateDate(new Date());
-                    oldUser.setCreateDate(DateUtil.parse(DateUtil.FORMAT2,oldUser.getCreateDate()));
-                    userDao.save(oldUser);
+                    if (userCode.equals(req.getHeader("user_id"))){//禁止用户自己修改自己的状态
+                        ownState+=userCode;
+                        unUserState +=userCode;
+                    }else {
+                        oldUser.setState(state);
+                        oldUser.setUpdateDate(new Date());
+                        oldUser.setCreateDate(DateUtil.parse(DateUtil.FORMAT2,oldUser.getCreateDate()));
+                        userDao.save(oldUser);
+                        userState +=userCode+",";
+                    }
                 }else {
-                    unUserState +=userCode+"";
+                    unUserState +=userCode;
                 }
             }
             if ("".equals(unUserState)){
+                //记录日志
+                logDao.save(new Log(new Date(),new Date(),"修改用户"+userState+"状态为："+state+"成功",0,req.getHeader("user_id")));
                 return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"用户状态修改成功");
             }else {
-                return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"除了"+unUserState+"用户状态修改失败，其余修改成功");
+                //记录日志
+                logDao.save(new Log(new Date(),new Date(),"修改用户"+userState+"状态为："+state+"成功",0,""));
+                if (userCodes[0].length()==unUserState.length()){
+                    if (userCodes[0].length()==ownState.length()){
+                        return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,""+ownState+"禁止修改自身的状态");
+                    }
+                    return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,""+unUserState+"用户状态修改失败");
+                }else {
+                    return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"除了"+unUserState+"用户状态修改失败，其余修改成功");
+                }
             }
         }catch (Exception e){
             e.printStackTrace();
@@ -181,14 +242,19 @@ public class UserController {
 
     @RequestMapping(value = "/changeUserPsw",method = RequestMethod.POST)
     @ApiOperation(value = "修改用户密码",notes = "修改用户密码")
-    public String changeUserPsw(@RequestParam String userCode,@RequestParam String userPsw,@RequestParam String oldUserPsw){
+    public String changeUserPsw(@RequestBody Object obj,HttpServletRequest req){
         try {
-            User oldUser = userDao.getUserByUserCode(userCode);
+            String userCode =JsonUtil.getString("userCode",obj);
+            String userPsw = JsonUtil.getString("userPsw",obj);
+            String oldUserPsw = JsonUtil.getString("oldUserPsw",obj);
             oldUserPsw = MD5Util.getMd5(userCode,oldUserPsw);//校验用户旧密码
+            User oldUser = userDao.getUserByUserCode(userCode);
             if (oldUserPsw.equals(oldUser.getUserPsw())){
                 oldUser.setUserPsw(MD5Util.getMd5(userCode,userPsw));//设置新密码
                 oldUser.setUpdateDate(new Date());
                 userDao.save(oldUser);
+                //记录日志
+                logDao.save(new Log(new Date(),new Date(),"修改用户"+userCode+"密码成功",0,req.getHeader("user_id")));
                 return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"密码修改成功");
             }else {
                 return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"旧密码不正确");
@@ -207,22 +273,101 @@ public class UserController {
             String userPsw = JsonUtil.getString("userPsw",object);
             Map<String, Object> map = new HashMap<>();
             User oldUser = userDao.getUserByUserCode(userCode);
-            if(null!=oldUser&&oldUser.getState()!=0){
-                 userPsw = MD5Util.getMd5(userCode,userPsw);
-                if(oldUser.getUserPsw().equals(userPsw)){
-                    //用户登录成功后返回一个user对象给前端时(不返回密码)
-                    oldUser.setUserPsw("");
-                    map.put("user",JsonUtil.fromObject(oldUser));
-                    String result = JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"登录成功");
-                    return JsonUtil.makeJsonBeanByKey(result,map);
+            if(null!=oldUser){
+                if (oldUser.getState()==0){
+                    return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"用户为停用状态,不能登录系统");
                 }else {
-                    return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"用户或密码不正确");
+                    userPsw = MD5Util.getMd5(userCode,userPsw);
+                    if(oldUser.getUserPsw().equals(userPsw)){
+                        //记录日志
+                        logDao.save(new Log(new Date(),new Date(),"用户"+userCode+"登录成功",0,userCode));
+                        //用户登录成功后返回一个user对象给前端时(不返回密码)
+                        oldUser.setUserPsw("");
+                        map.put("user",JsonUtil.fromObject(oldUser));
+                        //生成token保存到redis缓存，返回token给前端
+                        //TokenUtil.createAndSaveToken(userCode);
+                        //ValueOperations<Serializable, Object> operations = redisTemplate.opsForValue();
+                        //operations.set(userCode, "1234678");
+                       // map.put("token",new TokenUtil().getToken(userCode));
+                       // redisTemplate.opsForValue().set("token", "111",1,TimeUnit.MINUTES);
+
+
+                        String result = JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"登录成功");
+                        return JsonUtil.makeJsonBeanByKey(result,map);
+                    }else {
+                        return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"密码不正确");
+                    }
                 }
             }else {
-                return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"用户或密码不正确");
+                return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"用户不存在");
             }
         }catch(Exception e){
+            e.printStackTrace();
             return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"登录失败");
+        }
+    }
+
+    @RequestMapping(value = "resetPsw",method = RequestMethod.POST)
+    @ApiOperation(value = "重置用户密码",notes = "重置用户密码")
+    public String resetPsw(@RequestBody Object object,HttpServletRequest req){
+        try {
+            String userCode = JsonUtil.getString("userCode",object);
+            String userPsw = JsonUtil.getString("userPsw",object);
+            String verifyCode = JsonUtil.getString("verifyCode",object);
+
+            User oldUser = userDao.getUserByUserCode(userCode);
+            if (null!=oldUser){
+                //校验验证码否过期
+                //Date outDate = DateUtil.parse(DateUtil.FORMAT2,oldUser.getOutDate());
+               // Date currentDate = DateUtil.parse(DateUtil.FORMAT2,DateUtil.formatDate(DateUtil.FORMAT2,new Date()));
+                //if (outDate.getTime()<currentDate.getTime()){
+                //    return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"验证码已经过期，请重申请找回密码！");
+                //}
+
+                if (redisTemplate.opsForValue().get(userCode)!=null){
+                    String oldVerifyCode = redisTemplate.opsForValue().get(userCode).toString();
+                    if (verifyCode.equals(oldVerifyCode)){
+                        userPsw = MD5Util.getMd5(userCode,userPsw);
+                        oldUser.setUserPsw(userPsw);
+                        userDao.save(oldUser);
+                        //记录日志
+                        logDao.save(new Log(new Date(),new Date(),"用户重置密码成功",0, BasicFilter.user_id));
+                        return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"密码设置成功");
+                    }else {
+                        return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"验证码不正确");
+                    }
+                }else {
+                    return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"验证码过期");
+                }
+            }else {
+                return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"用户不存在");
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"重置密码失败！");
+        }
+    }
+
+    @RequestMapping(value = "getUserBySate",method = RequestMethod.POST)
+    @ApiOperation(value = "根据用户状态分页获取用户",notes = "根据用户状态分页获取用户")
+    public String  getUserBySate(
+            @RequestParam("state")int state,
+            @RequestParam(value = "pageNum", defaultValue = "0") Integer pageNum,
+            @RequestParam(value = "pageSize", defaultValue = "15") Integer pageSize){
+        try {
+            Sort sort = new Sort(Sort.Direction.DESC, "userCode");
+            Pageable pageable = new PageRequest(pageNum-1 , pageSize, sort);
+            Page<User> users = userDao.findUsersByState(state,pageable);
+            List<Object> list = new ArrayList<>();
+            for(User user:users){
+                list.add(user);
+            }
+            long total = userDao.countByState(state);//获取查询总数
+            long totalPage = total%pageSize==0? total/pageSize:total/pageSize+1;//总页数
+            return TableUtil.createTableDate(list,total,pageNum,totalPage,pageSize);
+        }catch (Exception e){
+            e.printStackTrace();
+            return  JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"获取失败");
         }
     }
 
