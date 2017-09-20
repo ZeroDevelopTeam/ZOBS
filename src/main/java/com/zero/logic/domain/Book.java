@@ -78,7 +78,7 @@ public class Book extends BasicBean{
     private String image_l;
     @Column(name = "IMAGE_S")
     //小图路径
-    private String [] image_s;
+    private String  image_s;
     @Column(name = "ORDERBY")
     //排序
     private int orderBy;
@@ -217,11 +217,11 @@ public class Book extends BasicBean{
         this.image_l = image_l;
     }
 
-    public String[] getImage_s() {
+    public String getImage_s() {
         return image_s;
     }
 
-    public void setImage_s(String[] image_s) {
+    public void setImage_s(String image_s) {
         this.image_s = image_s;
     }
 

@@ -1,4 +1,5 @@
 package com.zero.logic.controller;
+import com.zero.basic.filter.BasicFilter;
 import com.zero.logic.dao.LogDao;
 import com.zero.logic.domain.Log;
 import com.zero.logic.util.JsonUtil;
@@ -27,11 +28,13 @@ public class UploadFileController {
     private LogDao logDao;
    @RequestMapping(value = "/uploadFile",method = RequestMethod.POST)
     @ApiOperation(value = "文件上传",notes = "文件上传")
-    public String singleFileUpload(@RequestParam("file")MultipartFile file,HttpServletRequest req) throws JSONException {
+    public String singleFileUpload(@RequestParam("file")MultipartFile file) throws JSONException {
         try {
             String msg = UploadFileUtil.singleFileUpload(file);
-            if("文件上传成功".equals(msg)){
-                logDao.save(new Log(new Date(),new Date(),"文件"+file.getOriginalFilename()+"上传成功",0,req.getHeader("user_id")));
+            int status = Integer.parseInt(JsonUtil.getString("status",msg));
+            if(status==200){
+                String fileName = JsonUtil.getString("msg",msg);
+                logDao.save(new Log(new Date(),new Date(),"文件"+file.getOriginalFilename()+"上传成功",0, BasicFilter.user_id));
                 return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,msg);
             }else {
                 return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,msg);

@@ -1,5 +1,4 @@
 package com.zero.logic.util;
-
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

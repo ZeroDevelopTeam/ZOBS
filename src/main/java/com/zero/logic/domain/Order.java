@@ -23,7 +23,7 @@ public class Order extends BasicBean{
     @Id
     @Column(name = "ORDERID")
     private String orderId;
-    //订单状态 //废止订单-1，交易成功0，已付款待配送1，3交易关闭，配送中2；未付款4，退款5，退款退货6
+    //订单状态 //（待付款的时候可以取消订单且做物理删除）取消订单-1，交易成功0，待付款1，待商家发货2，商家已经发货3，申请退款待商家确认4,退款成功5，申请退货待商家确认6，退货成功7，关闭交易8，
     @Column(name = "STATE")
     private int state;
     //订单地址
@@ -38,13 +38,23 @@ public class Order extends BasicBean{
     //送货人
     @Column(name = "DELIVERY")
     private String delivery;
+    //送货人电话
+    @Column(name = "DELIVERYPHONE")
+    private String deliveryPhone;
+
     //送货时间
     @Column(name = "DELIVERYDATE")
     private Date deliveryDate;
     //收获时间
     @Column(name = "RECEIVERDATE")
     private Date receiverDate;
+    //快递单号
+    @Column(name = "EXPRESSNUMBER")
+    private String expressNumber;
 
+    //支付方式  0--货到付款，2--在线支付
+    @Column(name = "PAYMODE")
+    private int payMode;
 
     //setter和getter方法
     public String getOrderId() {
@@ -112,4 +122,27 @@ public class Order extends BasicBean{
         this.receiverDate = receiverDate;
     }
 
+    public String getExpressNumber() {
+        return expressNumber;
+    }
+
+    public void setExpressNumber(String expressNumber) {
+        this.expressNumber = expressNumber;
+    }
+
+    public String getDeliveryPhone() {
+        return deliveryPhone;
+    }
+
+    public void setDeliveryPhone(String deliveryPhone) {
+        this.deliveryPhone = deliveryPhone;
+    }
+
+    public int getPayMode() {
+        return payMode;
+    }
+
+    public void setPayMode(int payMode) {
+        this.payMode = payMode;
+    }
 }

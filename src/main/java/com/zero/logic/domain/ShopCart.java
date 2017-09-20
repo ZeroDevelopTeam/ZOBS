@@ -16,8 +16,8 @@ import javax.persistence.*;
 public class ShopCart extends BasicBean{
     //
     @Id
-    @Column(name = "SHOPCARTID")
-    private String shopCartId;
+    @Column(name = "USERCODE")
+    private String userCode;
 
     @Id
     @Column(name = "BOOKID")
@@ -26,14 +26,15 @@ public class ShopCart extends BasicBean{
     @Column(name = "BOOKNUM")
     private int bookNum;
 
+    @Column(name = "IMAGE_L")
+    private String image_l;
 
-
-    public String getShopCartId() {
-        return shopCartId;
+    public String getUserCode() {
+        return userCode;
     }
 
-    public void setShopCartId(String shopCartId) {
-        this.shopCartId = shopCartId;
+    public void setUserCode(String userCode) {
+        this.userCode = userCode;
     }
 
     public String getBookId() {
@@ -50,5 +51,13 @@ public class ShopCart extends BasicBean{
 
     public void setBookNum(int bookNum) {
         this.bookNum = bookNum;
+    }
+
+    public String getImage_l() {
+        return image_l;
+    }
+
+    public void setImage_l(String image_l) {
+        this.image_l = image_l;
     }
 }

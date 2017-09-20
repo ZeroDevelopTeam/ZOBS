@@ -45,7 +45,7 @@ public interface UserDao extends CrudRepository<User,Integer> {
     public long count(@Param("keyWord")String keyWord);
 
     /**
-     * 根据state用户信息
+     * 根据state分页获取用户信息
      * @param state
      * @param pageable
      * @return

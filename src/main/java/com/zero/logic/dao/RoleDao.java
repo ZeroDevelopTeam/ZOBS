@@ -30,7 +30,7 @@ public interface RoleDao extends CrudRepository<Role,Integer> {
      * @param pageable
      * @return
      */
-   @Query("select t from Role t where t.roleName like %?1% or t.roleId like %?1% or t.roleDesc like %?1%")
+   @Query("select t from Role t where t.roleName like %?1% or t.roleId like %?1% or t.roleDesc like %?1% or t.createUser like %?1%")
    public Page<Role> findByRoleName(@Param("keyWord") String keyWord, Pageable pageable);
 
     /**
@@ -38,7 +38,7 @@ public interface RoleDao extends CrudRepository<Role,Integer> {
      * @param keyWord
      * @return
      */
-    @Query("select count(*) from Role t where t.roleName like %?1% or t.roleId like %?1% or t.roleDesc like %?1%" )
+    @Query("select count(*) from Role t where t.roleName like %?1% or t.roleId like %?1% or t.roleDesc like %?1% or t.createUser like %?1%" )
     public long count(@Param("keyWord")String keyWord);
 
 
@@ -50,4 +50,13 @@ public interface RoleDao extends CrudRepository<Role,Integer> {
     @Query(value = "select * from sys_user_role t where t.role_id=:role_id",nativeQuery = true)
     public List<Object> getObj(@Param("role_id") String role_id);
 
+    /**
+     * 根据state分页获取角色
+     * @param state
+     * @return
+     */
+    @Query("select t from Role t where t.state=:state")
+    public Page<Role> findByState(@Param("state") int state,Pageable pageable);
+    @Query("select count(*) from Role t where t.state=:state")
+    public long countByState(@Param("state") int state);
 }

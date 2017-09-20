@@ -82,4 +82,47 @@ public interface BookDao extends CrudRepository<Book,Integer> {
      */
     @Query(value = "select count(*) from sys_book t where 0<t.discount and t.discount<1",nativeQuery = true)
     public long countByDiscount();
+
+
+    /**
+     * 以分类ID和discount作为条件分页模糊查询折扣货物
+     * @param pageNum
+     * @param pageSize
+     * @param typeId
+     * @return 属于该分类的折扣货物
+     */
+    @Query(value = "select * from sys_book t where t.typeId like %?3% and 0<t.discount and t.discount<1 ORDER BY t.discount DESC limit ?1,?2",nativeQuery = true)
+    public List<Book> getByDiscountAndTypeId(int pageNum,int pageSize,String typeId);
+    @Query("select count (*) from Book t where t.typeId like %?1% and 0<t.discount and t.discount<1 ")
+    public long countBookByDiscountAndTypeId(String typeId);
+
+    /**
+     * 根据state上架下架分页获取book
+     * @param state
+     * @param pageable
+     * @return book
+     */
+    @Query("select t from  Book t where t.state=:state")
+    public Page<Book> findByState(@Param("state") int state,Pageable pageable);
+    @Query("select count(*) from Book t where t.state=:state")
+    public long countByState(@Param("state") int state);
+
+
+    /**
+     * 分类和价格作为条件模糊查询图书
+     * @param keyWord
+     * @param typeId
+     * @param
+     * @return 图书
+     */
+    //升序
+    @Query(value = "select * from sys_book t where t.typeId like %?2% and t.price*t.discount>=?3 and t.price*t.discount <=?4 and (t.bookName like %?1% or t.author like %?1% or t.bookDesc like %?1%) ORDER BY t.price*t.discount ASC limit ?5,?6",nativeQuery = true)
+    List<Book> findBooksByTypeIdASC(String keyWord,String typeId,double beginPrice,double finishPrice,int pageNum,int pageSize);
+    //降序
+    @Query(value = "select * from sys_book t where t.typeId like %?2% and t.price*t.discount>=?3 and t.price*t.discount <=?4 and (t.bookName like %?1% or t.author like %?1% or t.bookDesc like %?1%) ORDER BY t.price*t.discount DESC limit ?5,?6",nativeQuery = true)
+    List<Book> findBooksByTypeIdDESC(String keyWord,String typeId,double beginPrice,double finishPrice,int pageNum,int pageSize);
+    @Query("select count (*) from Book t where  t.typeId like %?2% and t.price*t.discount>=?3 and t.price*t.discount <=?4 and (t.bookName like %?1% or t.author like %?1% or t.bookDesc like %?1%)")
+
+    public long countByTypeId(@Param("keyWord")String keyWord,@Param("typeId")String typeId,@Param("beginPrice")double beginPrice,@Param("finishPrice")double finishPrice);
+
 }

@@ -6,7 +6,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 文件上传
@@ -16,35 +18,42 @@ import java.util.List;
  */
 public class UploadFileUtil {
 
+
+    private static String fileName="";
     /**
      * 单个文件上传
      * @param file
      * @return msg
      */
-    public static  String singleFileUpload(MultipartFile file){
+    public static  String singleFileUpload(MultipartFile file) throws Exception {
         if(file.isEmpty()){
             //redirectAttributes.addFlashAttribute("message","请选择一个文件上传！");
-            return"请选择上传文件";
+            return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"请选择上传文件");
         }
         if(!scopeFileSize(file)){//上传文件大小限制
-            return "文件太大";
+            return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"文件太大");
         }
         if(".exe".equals(getFileType(file.getOriginalFilename()))){
-            return "不能上传应用程序文件";
+            return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"不能上传应用程序文件");
         }
         try {
             //获取文件、保存文件
             byte[] bytes = file.getBytes();
-            BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(new File(UploadFilePathUtil.uploadFilePath+"/"+file.getOriginalFilename())));
+            //用时间戳+文件名重命名文件名
+             fileName = System.currentTimeMillis()+getFileType(file.getOriginalFilename());
+            BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(new File(UploadFilePathUtil.uploadFilePath+"/"+fileName)));
             out.write(bytes);
             out.flush();
             out.close();
-
         }catch (IOException e){
             e.printStackTrace();
-            return "文件上传失败";
+            return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"文件上传失败");
         }
-        return "文件上传成功";
+        Map map = new HashMap();
+        map.put("status",JsonUtil.RESULT_SUCCESS);
+        map.put("msg","上传成功");
+        map.put("fileName",fileName);
+        return JsonUtil.fromObject(map);
     }
 
     /**
@@ -98,7 +107,7 @@ public class UploadFileUtil {
      * @param files
      * @return
      */
-    public static String moreFileUpload(MultipartFile[] files){
+/*    public static String moreFileUpload(MultipartFile[] files){
         if(files!=null && files.length>=1){
             BufferedOutputStream bs = null;
             MultipartFile file = null;
@@ -126,5 +135,5 @@ public class UploadFileUtil {
             }
         }
         return  "文件上传成功";
-    }
+    }*/
 }

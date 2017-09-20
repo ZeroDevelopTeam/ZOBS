@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Configuration
 public class TokenUtil {
-    private static int TOKEN_EXPIRES_MINUTES = 24; //默认为24*60（24小时）
+    private static int TOKEN_EXPIRES_MINUTES =60; //token保存时间默认为60分钟
     @Autowired
     private static RedisTemplate redisTemplate;
     @Autowired
@@ -35,11 +35,10 @@ public class TokenUtil {
 
         Properties propes = ReadProperties.getPropes("/application.properties");
         if ("".equals(propes.getProperty("TOKEN_EXPIRES_MINUTES")));
-         TOKEN_EXPIRES_MINUTES = Integer.parseInt(propes.getProperty("uploadFilePath"));
-        //原token
-        String token = UUID.randomUUID().toString();
-        //将token用MD5加密并以<key,value>的形式缓存到redis
-        redisTemplate.boundValueOps(userCode).set(MD5Util.getMd5(userCode,token),TOKEN_EXPIRES_MINUTES, TimeUnit.MINUTES);
+         TOKEN_EXPIRES_MINUTES = Integer.parseInt(propes.getProperty("TOKEN_EXPIRES_MINUTES"));
+        String token = UUID.randomUUID().toString(); //原token
+        redisTemplate.opsForValue().set(userCode, token,TOKEN_EXPIRES_MINUTES,TimeUnit.MINUTES);//将token以<key,value>的形式缓存到redis
+
     }
 
     /**
@@ -48,14 +47,12 @@ public class TokenUtil {
      * @return
      */
     public static String getToken(String userCode){
-        System.out.println(redisTemplate.opsForValue().get("token")+">>>>>>>>>>>>>>>>>");
-        String token = "";
-        if (redisTemplate.opsForValue().get("token")==null ){
-            System.out.println(redisTemplate.opsForValue().get("token"));
+        String token ="";
+        if (null==userCode ||"".equals(userCode)){
+            return token;
         }
-        if (redisTemplate.opsForValue().get("token")!=null){
-            System.out.println(redisTemplate.opsForValue().get("token").toString()+">>>>>>>>gggggg>>>>>>>>>");
-            token = redisTemplate.opsForValue().get("token").toString();
+        if (redisTemplate.opsForValue().get(userCode)!=null){
+            token = redisTemplate.opsForValue().get(userCode).toString();
         }
         return token;
     }
@@ -66,10 +63,15 @@ public class TokenUtil {
      * @return true/false
      */
     public static boolean checkToken(String userode,String token){
-        token = MD5Util.getMd5(userode,token);
-        if (token.equals(redisTemplate.boundValueOps(userode).get())){
-            //校验成功延长token过期时间
-            redisTemplate.boundValueOps(userode).expire(TOKEN_EXPIRES_MINUTES,TimeUnit.MINUTES);
+        if (null==userode){
+            return false;
+        }
+        if (redisTemplate.opsForValue().get(userode)==null){
+            return false;
+        }
+        if (token.equals(redisTemplate.opsForValue().get(userode).toString())){
+            //redisTemplate.boundValueOps(userode).expire(TOKEN_EXPIRES_MINUTES,TimeUnit.MINUTES); //校验成功延长token过期时间
+            redisTemplate.expire(userode,TOKEN_EXPIRES_MINUTES,TimeUnit.MINUTES);//校验成功延长token过期时间
             return true;
         }else {
             return false;
@@ -82,5 +84,17 @@ public class TokenUtil {
      */
     public static void deleteToken(String userCode){
         redisTemplate.delete(userCode);
+    }
+
+    /***
+     * 将error与userCode拼接作为 key值，错误次数作为value值  记录用户登录错误次数
+     * @param key
+     */
+    public static void saveErrorNum(String key){
+        int errorNum=0;
+        if (null!=redisTemplate.opsForValue().get(key)){
+            errorNum=Integer.parseInt(redisTemplate.opsForValue().get(key).toString());
+        }
+        redisTemplate.opsForValue().set(key,errorNum+1);
     }
 }

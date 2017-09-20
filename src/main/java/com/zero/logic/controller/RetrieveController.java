@@ -28,7 +28,7 @@ import java.util.*;
 @RestController
 @RequestMapping("retrieve")
 public class RetrieveController {
-    @Autowired
+  /*  @Autowired
     private RetrieveDao retrieveDao;
     @Autowired
     private RetrieveBookDao retrieveBookDao;
@@ -258,7 +258,7 @@ public class RetrieveController {
                 oldBook.setUpdateDate(new Date());
                 bookDao.save(oldBook);
 
-                /*if (state==1){//1--主动回收
+                *//*if (state==1){//1--主动回收
                     Book oldBook = bookDao.getBookByBookId(bookId);
                     if (null!=oldBook){
                         RetrieveBook  oldRetrieveBook = retrieveBookDao.getRetrieveBookByBookId(bookId);
@@ -295,7 +295,7 @@ public class RetrieveController {
                     oldBook.setBookNum(storeNum);
                     oldBook.setUpdateDate(new Date());
                     bookDao.save(oldBook);
-                }*/
+                }*//*
             }
             for (RetrieveBook oldRetrieveBook:oldretrieveBooks){
                 boolean flag = false;
@@ -373,5 +373,5 @@ public class RetrieveController {
             e.printStackTrace();
             return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"删除回收单失败");
         }
-    }
+    }*/
 }

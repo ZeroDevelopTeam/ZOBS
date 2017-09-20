@@ -1,5 +1,6 @@
 package com.zero.logic.controller;
 
+import com.zero.basic.filter.BasicFilter;
 import com.zero.logic.dao.LogDao;
 import com.zero.logic.dao.PurviewDao;
 import com.zero.logic.dao.RoleDao;
@@ -47,7 +48,7 @@ public class RoleController {
             role.setUpdateDate(new Date());
             roleDao.save(role);
             //记录日志
-            logDao.save(new Log(new Date(),new Date(),"新增角色"+role.getRoleName()+"信息成功",0,""));
+            logDao.save(new Log(new Date(),new Date(),"新增角色"+role.getRoleName()+"信息成功",0,BasicFilter.user_id));
             return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS, "新增角色信息成功");
         } catch (Exception e) {
             return JsonUtil.returnStr(JsonUtil.RESULT_FAIL, "新增角色信息失败");
@@ -73,11 +74,11 @@ public class RoleController {
             roleDao.save(role);
             if ("".equals(unPurviewId)){
                 //记录日志
-                logDao.save(new Log(new Date(),new Date(),"修改角色成功"+role.getRoleName()+"信息成功",0,""));
+                logDao.save(new Log(new Date(),new Date(),"修改角色成功"+role.getRoleName()+"信息成功",0,BasicFilter.user_id));
                 return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS, "修改角色成功");
             }else {
                 //记录日志
-                logDao.save(new Log(new Date(),new Date(),"修改角色成功"+role.getRoleName()+"信息成功",0,""));
+                logDao.save(new Log(new Date(),new Date(),"修改角色成功"+role.getRoleName()+"信息成功",0,BasicFilter.user_id));
                 return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS, "修改角色成功,权限"+unPurviewId+"不存在或者为停用，角色未拥有这些权限");
             }
         } catch (Exception e) {
@@ -108,14 +109,14 @@ public class RoleController {
             }
             if ("".equals(unDeleteId)){
                 //记录日志
-                logDao.save(new Log(new Date(),new Date(),"删除角色"+deleteIds+"成功",0,""));
+                logDao.save(new Log(new Date(),new Date(),"删除角色"+deleteIds+"成功",0,BasicFilter.user_id));
                 return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"删除角色成功");
             }else {
                 if (roleIds[0].length()==unDeleteId.length()){//删除单个角色
                     return JsonUtil.returnStr(JsonUtil.RESULT_FAIL,"" + unDeleteId + "角色未停用，删除角色失败");
                 }else {
                     //记录日志
-                    logDao.save(new Log(new Date(),new Date(),"删除角色"+deleteIds+"成功",0,""));
+                    logDao.save(new Log(new Date(),new Date(),"删除角色"+deleteIds+"成功",0,BasicFilter.user_id));
                     return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS,"除" + unDeleteId + "角色未停用，其余角色删除成功");
                 }
             }
@@ -145,8 +146,18 @@ public class RoleController {
         try {
             Sort sort = new Sort(Sort.Direction.DESC, "roleId");
             Pageable pageable = new PageRequest(pageNum-1,pageSize,sort);
-            Page<Role> roles = roleDao.findByRoleName(keyWord,pageable);
-            long total = roleDao.count(keyWord);
+            Page<Role> roles = null;
+            long total =0;
+            if ("启用".equals(keyWord)){
+                roles = roleDao.findByState(1,pageable);
+                total = roleDao.countByState(1);
+            }else if ("停用".equals(keyWord)){
+                roles = roleDao.findByState(0,pageable);
+                total = roleDao.countByState(0);
+            }else {
+               roles = roleDao.findByRoleName(keyWord,pageable);
+               total = roleDao.count(keyWord);
+            }
             List<Object> list = new ArrayList<>();
             for (Role role:roles){
                 list.add(role);
@@ -182,11 +193,11 @@ public class RoleController {
              }
              if ("".equals(unRoleState)){
                  //记录日志
-                 logDao.save(new Log(new Date(),new Date(),"修改角色"+roleStates+"状态成功",0,""));
+                 logDao.save(new Log(new Date(),new Date(),"修改角色"+roleStates+"状态成功",0,BasicFilter.user_id));
                  return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS, "修改角色状态成功");
              }else {
                  //记录日志
-                 logDao.save(new Log(new Date(),new Date(),"修改角色"+roleStates+"状态成功",0,""));
+                 logDao.save(new Log(new Date(),new Date(),"修改角色"+roleStates+"状态成功",0, BasicFilter.user_id));
                  return JsonUtil.returnStr(JsonUtil.RESULT_SUCCESS, "除了角色"+unRoleState+"状态修改失败，其余角色状态修改成功");
              }
          }catch (Exception e){

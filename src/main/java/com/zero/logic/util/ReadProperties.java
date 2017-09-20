@@ -16,8 +16,6 @@ import java.util.Properties;
  */
 public class ReadProperties {
 
-    public static Properties properties=null;
-
     //gettter 方法
     public static Properties getProperties() {
         return ReadProperties.getPropes("/application.properties");
@@ -25,15 +23,16 @@ public class ReadProperties {
 
     /**
      * 根据传入的文件名读取配置文件信息
+     *
      * @param string
      * @return
      */
-    public static Properties getPropes(String string){
+    public static Properties getPropes(String string) {
         Properties propes;
         try {
             Resource resource = new ClassPathResource(string);
             propes = PropertiesLoaderUtils.loadProperties(resource);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }

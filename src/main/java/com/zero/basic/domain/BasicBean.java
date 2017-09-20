@@ -1,7 +1,6 @@
 package com.zero.basic.domain;
 
 import com.zero.logic.util.DateUtil;
-
 import javax.persistence.*;
 import java.text.ParseException;
 import java.util.Date;
